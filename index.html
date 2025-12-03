@@ -4,57 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MPPS Pedduru Fun Zone!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #FF5733;
             --secondary-color: #28a745;
-            --bg-sky: #87CEEB;
-            --bg-ground: #f0e68c;
+            --chalkboard-bg: #2e4e37;
+            --paper-bg: #fdfbf7;
+            --line-color: #a2a2a2;
         }
 
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, var(--bg-sky), var(--bg-ground));
+            font-family: 'Patrick Hand', cursive, sans-serif; /* School font */
+            /* Chalkboard background texture */
+            background-color: var(--chalkboard-bg);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg %3E%3Cpolygon fill='%2333553d' points='100 57.1 64 93.1 71.5 100.6 100 72.1'/%3E%3Cpolygon fill='%23385d43' points='100 57.1 100 72.1 128.5 100.6 136 93.1'/%3E%3Cpolygon fill='%2333553d' points='100 142.9 136 106.9 128.5 99.4 100 127.9'/%3E%3Cpolygon fill='%23385d43' points='100 142.9 100 127.9 71.5 99.4 64 106.9'/%3E%3C/g%3E%3C/svg%3E");
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            color: #333;
         }
 
         #game-container { position: relative; width: 100vw; height: 100vh; }
 
-        /* --- Screens Styling --- */
-        #start-screen, #end-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        /* --- Screens Styling (Notebook Paper Look) --- */
+        #start-screen, #end-screen, #thank-you-screen {
+            position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(255, 255, 255, 0.96);
+            background-color: var(--paper-bg);
+            /* Lined paper effect */
+            background-image: repeating-linear-gradient(transparent, transparent 29px, var(--line-color) 30px);
             z-index: 100; text-align: center; padding: 20px; box-sizing: border-box;
             transition: opacity 0.3s ease;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            /* Red margin line on the left */
+            border-left: 5px solid #ff9999;
         }
-
-        h1 { color: #d35400; font-size: 1.8rem; margin-bottom: 5px; }
-        h2 { color: #2c3e50; font-size: 1.1rem; margin: 5px 0 15px 0; }
-        .instructions { font-size: 1.1rem; color: #333; background: #e9ecef; padding: 10px 20px; border-radius: 15px; margin-bottom: 10px; }
-        .game-icon-large { font-size: 3rem; margin: 10px; animation: bounce 2s infinite; }
         
-        .btn {
-            padding: 15px 40px; font-size: 1.2rem; font-weight: bold; color: white;
-            border: none; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: 20px;
-            transition: transform 0.1s, box-shadow 0.1s; background-color: var(--secondary-color);
+        #thank-you-screen { z-index: 110; background: var(--chalkboard-bg); color: white; border: 5px solid #8B4513; background-image: none;}
+
+        h1 { color: #d35400; font-size: 2.2rem; margin-bottom: 5px; letter-spacing: 1px; }
+        h2 { color: #2c3e50; font-size: 1.4rem; margin: 5px 0 15px 0; }
+        
+        /* --- Visits Counter --- */
+        .counter-box {
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px dashed #555;
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #555;
         }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .btn-restart { background-color: #3498db; }
+        #visit-count { color: var(--primary-color); font-weight: bold; font-size: 1.3rem; }
+
+        .instructions { font-size: 1.3rem; color: #333; background: #fff3cd; padding: 15px; border: 2px solid #e0c387; border-radius: 15px; margin-bottom: 10px; }
+        .game-icon-large { font-size: 3.5rem; margin: 10px; animation: bounce 2s infinite; }
+        
+        /* --- Buttons (School eraser/block look) --- */
+        .btn {
+            padding: 12px 30px; font-size: 1.5rem; font-weight: bold; color: white;
+            border: 3px solid #1e7e34; border-radius: 8px; cursor: pointer;
+            box-shadow: 3px 3px 0px #1e7e34; margin-top: 15px;
+            transition: transform 0.1s, box-shadow 0.1s; background-color: var(--secondary-color);
+            font-family: 'Patrick Hand', cursive;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #1e7e34; }
+        .btn-restart { background-color: #3498db; border-color: #21618c; box-shadow: 3px 3px 0px #21618c;}
+        .btn-restart:active { box-shadow: 0px 0px 0px #21618c; }
+        .btn-exit { background-color: #c0392b; border-color: #922b21; box-shadow: 3px 3px 0px #922b21; font-size: 1.2rem; padding: 10px 25px;}
+        .btn-exit:active { box-shadow: 0px 0px 0px #922b21; }
 
         /* --- Invitation Card --- */
         .invite-card {
-            background: #fff3cd; padding: 20px; border-radius: 15px; 
-            border: 3px solid #ffeeba; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: #fff; padding: 20px; border-radius: 2px; 
+            border: 4px solid #FF5733; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
             margin: 20px 0; text-align: left; display: inline-block;
             animation: slideUp 0.5s ease-out;
+            transform: rotate(-2deg); /* Slightly tilted look */
         }
-        .invite-card p { margin: 8px 0; color: #333; font-size: 1.1rem;}
+        .invite-card p { margin: 8px 0; color: #333; font-size: 1.3rem;border-bottom: 1px dashed #ccc;}
 
         /* --- Game Elements Common --- */
         .game-item { position: absolute; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; touch-action: none;}
@@ -63,30 +96,26 @@
         /* Game 1: Balloons */
         .balloon {
             bottom: -120px; width: 70px; height: 90px;
-            border-radius: 50%; color: white; font-weight: bold; font-size: 13px;
+            border-radius: 50%; color: white; font-weight: bold; font-size: 14px;
             box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
             animation: wobble 2s ease-in-out infinite alternate;
+            font-family: sans-serif; /* Keep balloon text simple */
         }
         .balloon::before { content: ''; position: absolute; bottom: -12px; left: 50%; width: 2px; height: 25px; background-color: rgba(0,0,0,0.3); transform: translateX(-50%); }
 
-        /* Game 2: Books */
-        .book-item {
-            font-size: 50px;
-            animation: popIn 0.3s ease-out;
-        }
+        /* Game 2: Books & Game 3: Sweets */
+        .book-item, .sweet-item { font-size: 55px; filter: drop-shadow(3px 3px 2px rgba(0,0,0,0.3)); }
+        .book-item { animation: popIn 0.3s ease-out; }
+        .sweet-item { top: -60px; animation: spin 3s linear infinite; }
 
-        /* Game 3: Sweets */
-        .sweet-item {
-            top: -60px; font-size: 50px;
-            animation: spin 3s linear infinite;
-        }
-
-        /* --- Score Display --- */
+        /* --- Score Display (Slate look) --- */
         #score-container {
-            position: absolute; top: 15px; left: 15px;
-            background: rgba(255,255,255,0.9); padding: 10px 15px; border-radius: 20px;
-            font-size: 1.2rem; font-weight: bold; color: #333; z-index: 50;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: absolute; top: 10px; left: 10px;
+            background: #333; /* Slate dark gray */
+            border: 4px solid #8B4513; /* Wood frame */
+            padding: 8px 15px; border-radius: 5px;
+            font-size: 1.4rem; font-weight: bold; color: #eee; z-index: 50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         .score-pulse { animation: pulse 0.3s ease-in-out; }
 
@@ -95,7 +124,7 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); color: var(--primary-color); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); color: #ffff00; } 100% { transform: scale(1); } }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -105,31 +134,42 @@
         <div id="score-container">Score: <span id="score">0</span>/15</div>
 
         <div id="start-screen">
-            <h1>MPPS Pedduru<br>Fun Zone!</h1>
+            <h1>MPPS Pedduru Fun Zone!</h1>
             <h2>Mega PTM Celebration</h2>
+            
+            <div class="counter-box">
+                🎒 Total Games Played by Parents & Villagers: <br>
+                <span id="visit-count">Loading...</span>
+            </div>
+
             <div id="game-instruction-block">
                 <div class="game-icon-large">❓</div>
-                <p class="instructions">Click below to pick a random game!</p>
+                <p class="instructions" style="background:none; border:none; font-weight: bold;">Click below to pick a random game!</p>
             </div>
             <button class="btn" id="start-btn" onclick="prepareGame()">Play Random Game!</button>
         </div>
 
         <div id="end-screen" style="display: none; opacity: 0;">
-            <h1>🎉 Fantastic! 🎉</h1>
-            <p>You unlocked the invitation!</p>
+            <h1>🎉 Fantastic Job! 🎉</h1>
+            <p style="font-size: 1.4rem;">You unlocked the official invitation!</p>
             <div class="invite-card">
                 <p><strong>🏫 School:</strong> MPPS Pedduru</p>
                 <p><strong>📅 Date:</strong> 5th December 2025</p>
                 <p><strong>⏰ Time:</strong> 9:00 AM - 1:00 PM</p>
-                <hr style="border: 1px dashed #ccc;">
-                <p style="font-size: 0.95rem; text-align: center;">
-                    ✨ Student Cultural Events<br>
-                    🎮 Fun Games for Parents<br>
-                    🍛 Grand Community Feast
+                <p style="border:none; margin-top: 10px; text-align: center; font-size: 1.2rem;">
+                    ✨ Cultural Events • 🎮 Parents Games • 🍛 Grand Feast
                 </p>
             </div>
-            <p style="color: var(--primary-color); font-weight: bold; margin-bottom: 5px;">We hope to see you there!</p>
+            <p style="color: var(--secondary-color); font-weight: bold; margin-bottom: 5px; font-size: 1.4rem;">We hope to see you there!</p>
             <button class="btn btn-restart" onclick="resetGame()">Play Different Game</button>
+            <button class="btn btn-exit" onclick="exitGame()">Exit</button>
+        </div>
+
+        <div id="thank-you-screen" style="display: none;">
+            <h1>Thank You!</h1>
+            <p style="font-size: 1.5rem; color: #eee;">Thanks for visiting MPPS Pedduru Fun Zone.</p>
+            <p style="font-size: 1.2rem; color: #ccc;">Don't forget the Mega PTM on Dec 5th!</p>
+            <p style="margin-top: 30px;">(You can close this tab now)</p>
         </div>
     </div>
 
@@ -138,8 +178,8 @@
         const SCORE_LIMIT = 15;
         let score = 0;
         let gameActive = false;
-        let currentGameMode = null; // 'balloon', 'book', or 'sweet'
-        let spawnTimer, moveTimer; // Global timer references to clear them easily
+        let currentGameMode = null;
+        let spawnTimer;
 
         // --- DOM Elements ---
         const container = document.getElementById('game-container');
@@ -147,14 +187,42 @@
         const scoreContainer = document.getElementById('score-container');
         const startScreen = document.getElementById('start-screen');
         const endScreen = document.getElementById('end-screen');
+        const thankYouScreen = document.getElementById('thank-you-screen');
         const instructionBlock = document.getElementById('game-instruction-block');
         const startBtn = document.getElementById('start-btn');
+        const visitCountSpan = document.getElementById('visit-count');
 
         // --- Assets ---
         const balloonColors = ['#FF5733', '#28a745', '#3357FF', '#FF33A8', '#FFC300'];
         const balloonMessages = ["Dec 5!", "Feast!", "Games!", "MPPS", "Pedduru"];
-        const bookEmojis = ['📚', '📕', '📖', '📘'];
-        const sweetEmojis = ['🍬', '🍭', '🧁', '🍩'];
+        const bookEmojis = ['📚', '📕', '📖', '📘', '🎒', '✏️'];
+        const sweetEmojis = ['🍬', '🍭', '🧁', '🍩', '🍪'];
+
+        // --- Initial Setup: Visitor Counter ---
+        // This simulates a global counter using local storage on the user's device.
+        // It starts at a base number (e.g., 350) and increments on every play on this device.
+        function initCounter() {
+            let currentCount = localStorage.getItem('mpps_game_count');
+             // Base number to make it look active initially
+            const baseCount = 350;
+            
+            if (!currentCount) {
+                currentCount = baseCount;
+                localStorage.setItem('mpps_game_count', currentCount);
+            }
+            visitCountSpan.innerText = parseInt(currentCount).toLocaleString();
+        }
+        
+        function incrementCounter() {
+             let currentCount = parseInt(localStorage.getItem('mpps_game_count') || 350);
+             currentCount++;
+             localStorage.setItem('mpps_game_count', currentCount);
+             visitCountSpan.innerText = currentCount.toLocaleString();
+        }
+
+        // Initialize counter on load
+        initCounter();
+
 
         // --- Helper: Haptic Feedback ---
         function vibrate(ms) { if ("vibrate" in navigator) { navigator.vibrate(ms); } }
@@ -162,54 +230,45 @@
         // --- Helper: General Item Tap Handler ---
         function handleItemTap(item, SpecificMoveTimer = null) {
             if(item.classList.contains('popped')) return;
-            
             vibrate(80);
-            // If a specific movement timer exists for this item, clear it
             if (SpecificMoveTimer) clearInterval(SpecificMoveTimer);
-            
             score++;
             updateScoreDisplay();
-
-            item.classList.add('popped'); // Triggers CSS exit animation
+            item.classList.add('popped');
             setTimeout(() => { if(item.parentNode) item.remove(); }, 300);
-
             checkWinCondition();
         }
 
         // --- Game Control Logic ---
 
-        // 1. Prepares random game selection before starting
         function prepareGame() {
              vibrate(50);
-             // Disable button temporarily
+             incrementCounter(); // Increment visits when they click play
+
              startBtn.disabled = true;
              startBtn.innerText = "Selecting...";
 
              const modes = ['balloon', 'book', 'sweet'];
              currentGameMode = modes[Math.floor(Math.random() * modes.length)];
 
-             // Update instructions visually
              let icon, text;
              if (currentGameMode === 'balloon') {
                  icon = '🎈'; text = 'Tap 15 Balloons as they float up!';
              } else if (currentGameMode === 'book') {
-                 icon = '📚'; text = 'Tap 15 Books quickly before they vanish!';
+                 icon = '📚'; text = 'Tap 15 School Items quickly!';
              } else {
-                 icon = '🍬'; text = 'Catch 15 Sweets falling from the sky!';
+                 icon = '🍬'; text = 'Catch 15 Sweets falling down!';
              }
              
-             instructionBlock.innerHTML = `<div class="game-icon-large">${icon}</div><p class="instructions">${text}</p>`;
+             instructionBlock.innerHTML = `<div class="game-icon-large">${icon}</div><p class="instructions" style="background:none; border:none;">${text}</p>`;
 
-             // Short delay to let user see what game they got
              setTimeout(() => {
                  startBtn.innerText = "Start!";
                  startBtn.disabled = false;
-                 // Change onclick to actually start the chosen game
                  startBtn.onclick = launchSelectedGame;
              }, 1000);
         }
 
-        // 2. Launches the pre-selected game
         function launchSelectedGame() {
             vibrate(50);
             startScreen.style.opacity = '0';
@@ -219,7 +278,6 @@
             score = 0;
             updateScoreDisplay();
 
-            // Start the appropriate spawner based on selection
             if (currentGameMode === 'balloon') {
                 spawnTimer = setInterval(spawnBalloon, 800);
             } else if (currentGameMode === 'book') {
@@ -229,7 +287,6 @@
             }
         }
 
-        // 3. Resets UI to go back to start screen
         function resetGame() {
             vibrate(50);
             endScreen.style.opacity = '0';
@@ -237,17 +294,21 @@
                 endScreen.style.display = 'none'; 
                 startScreen.style.display = 'flex';
                 startScreen.style.opacity = '1';
-                // Reset start screen state
-                instructionBlock.innerHTML = `<div class="game-icon-large">❓</div><p class="instructions">Click below to pick a random game!</p>`;
+                instructionBlock.innerHTML = `<div class="game-icon-large">❓</div><p class="instructions" style="background:none; border:none; font-weight: bold;">Click below to pick a random game!</p>`;
                 startBtn.innerText = "Play Random Game!";
                 startBtn.onclick = prepareGame;
             }, 300);
 
-            // CLEANUP: Important! Stop all timers and remove all items
             clearInterval(spawnTimer);
-            // We can't easily clear individual movement timers, but removing elements stops them visually.
             document.querySelectorAll('.game-item').forEach(b => b.remove());
             gameActive = false;
+        }
+
+        // --- New Exit Function ---
+        function exitGame() {
+             vibrate(50);
+             endScreen.style.display = 'none';
+             thankYouScreen.style.display = 'flex';
         }
 
         function updateScoreDisplay() {
@@ -260,17 +321,16 @@
         function checkWinCondition() {
             if (score >= SCORE_LIMIT) {
                 gameActive = false;
-                clearInterval(spawnTimer); // Stop spawning new items
+                clearInterval(spawnTimer);
                 setTimeout(() => {
-                    vibrate([100, 50, 100]); // Victory vibe
+                    vibrate([100, 50, 100]);
                     endScreen.style.display = 'flex';
                     setTimeout(() => { endScreen.style.opacity = '1'; }, 50);
                 }, 800);
             }
         }
 
-
-        // --- GAME 1 MECHANICS: Balloons (Float Up) ---
+        // --- GAME MECHANICS (Same as before) ---
         function spawnBalloon() {
             if (!gameActive) return;
             const balloon = document.createElement('div');
@@ -279,52 +339,33 @@
             balloon.style.backgroundColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
             balloon.innerText = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
             container.appendChild(balloon);
-
             let bottomPos = -120;
             let speed = window.innerHeight / (Math.random() * 200 + 300); 
-
             const thisMoveTimer = setInterval(() => {
-                if (!gameActive || balloon.classList.contains('popped')) {
-                    clearInterval(thisMoveTimer); return;
-                }
-                bottomPos += speed;
-                balloon.style.bottom = bottomPos + 'px';
+                if (!gameActive || balloon.classList.contains('popped')) { clearInterval(thisMoveTimer); return; }
+                bottomPos += speed; balloon.style.bottom = bottomPos + 'px';
                 if (bottomPos > window.innerHeight + 50) { clearInterval(thisMoveTimer); balloon.remove(); }
             }, 16);
-
             addTapListeners(balloon, thisMoveTimer);
         }
 
-
-        // --- GAME 2 MECHANICS: Books (Whack-a-Mole popup) ---
         function spawnBook() {
             if (!gameActive) return;
             const book = document.createElement('div');
             book.classList.add('game-item', 'book-item');
             book.innerText = bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
-            
-            // Random position within bounds, avoiding score area
-            const maxX = window.innerWidth - 60;
-            const maxY = window.innerHeight - 100;
+            const maxX = window.innerWidth - 60; const maxY = window.innerHeight - 100;
             book.style.left = (Math.random() * maxX) + 'px';
-            book.style.top = (50 + Math.random() * (maxY - 50)) + 'px'; // Offset from top
-            
+            book.style.top = (70 + Math.random() * (maxY - 100)) + 'px'; // Adjusted for new notebook margins
             container.appendChild(book);
-
-            // Book disappears automatically after 1.2 seconds if not clicked
             const disappearTimer = setTimeout(() => {
                  if (book.parentNode && !book.classList.contains('popped')) {
-                     book.style.opacity = '0';
-                     setTimeout(() => book.remove(), 300);
+                     book.style.opacity = '0'; setTimeout(() => book.remove(), 300);
                  }
             }, 1200);
-
-            // Pass the timer so tapping cancels the auto-disappear
             addTapListeners(book, disappearTimer, true); 
         }
 
-
-        // --- GAME 3 MECHANICS: Sweets (Fall Down) ---
         function spawnSweet() {
              if (!gameActive) return;
             const sweet = document.createElement('div');
@@ -332,35 +373,24 @@
             sweet.innerText = sweetEmojis[Math.floor(Math.random() * sweetEmojis.length)];
             sweet.style.left = Math.random() * (window.innerWidth - 60) + 'px';
             container.appendChild(sweet);
-
             let topPos = -60;
-            // Faster speed for falling items
             let speed = window.innerHeight / (Math.random() * 150 + 200); 
-
             const thisMoveTimer = setInterval(() => {
-                if (!gameActive || sweet.classList.contains('popped')) {
-                    clearInterval(thisMoveTimer); return;
-                }
-                topPos += speed;
-                sweet.style.top = topPos + 'px';
+                if (!gameActive || sweet.classList.contains('popped')) { clearInterval(thisMoveTimer); return; }
+                topPos += speed; sweet.style.top = topPos + 'px';
                 if (topPos > window.innerHeight) { clearInterval(thisMoveTimer); sweet.remove(); }
             }, 16);
-
             addTapListeners(sweet, thisMoveTimer);
         }
 
-        // Helper to add both touch and mouse listeners for better mobile response
         function addTapListeners(element, timerId, isTimeout = false) {
-             const handler = (e) => {
-                 e.preventDefault();
-                 // If it's a timeout (like books), clear timeout. Otherwise clear interval.
+             const handler = (e) => { e.preventDefault();
                  if(isTimeout) clearTimeout(timerId); else clearInterval(timerId);
                  handleItemTap(element);
              };
              element.addEventListener('touchstart', handler, {passive: false});
              element.addEventListener('mousedown', handler);
         }
-
     </script>
 </body>
 </html>
