@@ -39,8 +39,13 @@
     }
 
     #result {
-      font-size: 26px;
+      font-size: 24px;
       margin-top: 12px;
+    }
+
+    .leader {
+      font-size: 22px;
+      margin: 6px;
     }
   </style>
 </head>
@@ -51,29 +56,43 @@
 
 <!-- NAME SCREEN -->
 <div id="nameScreen">
-  <p>👋 Hello! What is your name?</p>
+  <p>👋 What is your name?</p>
   <input id="nameInput" placeholder="Type your name" />
   <br><br>
-  <button onclick="startGame()">▶ Start</button>
+  <button onclick="startGame()">▶ Start Homework</button>
 </div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen" style="display:none;">
   <h2 id="welcome"></h2>
-  <p>Count and tap the correct answer!</p>
+  <p>Question <span id="qno"></span> / 15</p>
 
   <div id="question" class="box"></div>
   <div id="options"></div>
   <div id="result"></div>
 </div>
 
+<!-- END SCREEN -->
+<div id="endScreen" style="display:none;">
+  <h2>🎉 Homework Completed!</h2>
+  <p id="finalScore"></p>
+
+  <h3>🏆 Leaderboard</h3>
+  <div id="leaderboard"></div>
+
+  <br>
+  <button onclick="location.reload()">🔄 Play Again</button>
+</div>
+
 <script>
   let name = "";
   let a, b, correct;
+  let score = 0;
+  let questionCount = 0;
+  const TOTAL = 15;
 
-  /* 🔊 SOUND EFFECTS (Web Audio API) */
+  /* 🔊 SOUND EFFECTS */
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
   function playSound(freq, duration) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -89,13 +108,21 @@
     name = document.getElementById("nameInput").value || "Friend";
     document.getElementById("nameScreen").style.display = "none";
     document.getElementById("gameScreen").style.display = "block";
-    document.getElementById("welcome").innerHTML = "😊 Welcome, " + name + "!";
-    playSound(600, 0.2); // welcome sound
-    newQuestion();
+    document.getElementById("welcome").innerHTML = "😊 Good luck, " + name + "!";
+    playSound(600, 0.2);
+    nextQuestion();
   }
 
-  function newQuestion() {
+  function nextQuestion() {
+    if (questionCount === TOTAL) {
+      endGame();
+      return;
+    }
+
+    questionCount++;
+    document.getElementById("qno").innerText = questionCount;
     document.getElementById("result").innerHTML = "";
+
     a = Math.floor(Math.random() * 5) + 1;
     b = Math.floor(Math.random() * 5) + 1;
     correct = a + b;
@@ -116,14 +143,42 @@
 
   function check(ans) {
     if (ans === correct) {
-      document.getElementById("result").innerHTML =
-        "🎉 Correct, " + name + "!";
-      playSound(800, 0.3); // correct sound
-      setTimeout(newQuestion, 1200);
+      score++;
+      document.getElementById("result").innerHTML = "🎉 Correct!";
+      playSound(800, 0.3);
+      setTimeout(nextQuestion, 800);
     } else {
       document.getElementById("result").innerHTML = "❌ Try again!";
-      playSound(200, 0.3); // wrong sound
+      playSound(200, 0.3);
     }
+  }
+
+  function endGame() {
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("endScreen").style.display = "block";
+
+    document.getElementById("finalScore").innerHTML =
+      `👏 ${name}, you scored <b>${score} / 15</b>`;
+
+    saveScore();
+    showLeaderboard();
+  }
+
+  function saveScore() {
+    let board = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    board.push({ name, score });
+    board.sort((a, b) => b.score - a.score);
+    board = board.slice(0, 5);
+    localStorage.setItem("leaderboard", JSON.stringify(board));
+  }
+
+  function showLeaderboard() {
+    let board = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    let html = "";
+    board.forEach((e, i) => {
+      html += `<div class="leader">${i + 1}. ${e.name} — ${e.score}</div>`;
+    });
+    document.getElementById("leaderboard").innerHTML = html;
   }
 </script>
 
