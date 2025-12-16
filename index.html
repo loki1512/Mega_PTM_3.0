@@ -2,7 +2,10 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add & Pop!</title>
+  <title>Add & Pop! Homework</title>
+
+  <!-- Screenshot Library -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
     body {
@@ -13,10 +16,7 @@
       color: #333;
     }
 
-    h1 {
-      font-size: 30px;
-      margin-bottom: 6px;
-    }
+    h1 { font-size: 30px; margin-bottom: 6px; }
 
     .card {
       background: white;
@@ -40,12 +40,10 @@
       border: none;
       background: #6c8cff;
       color: white;
-      min-width: 80px;
+      min-width: 90px;
     }
 
-    button:disabled {
-      background: #ccc;
-    }
+    button:disabled { background: #ccc; }
 
     input {
       font-size: 20px;
@@ -62,16 +60,9 @@
       min-height: 30px;
     }
 
-    .progress {
-      font-size: 18px;
-      margin-top: 6px;
-      color: #555;
-    }
+    .progress { font-size: 18px; color: #555; }
 
-    .leader {
-      font-size: 20px;
-      margin: 6px;
-    }
+    .leader { font-size: 20px; margin: 6px; }
   </style>
 </head>
 
@@ -81,7 +72,7 @@
 
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
-  <p>👋 What is your name?</p>
+  <p>👋 Student Name</p>
   <input id="nameInput" placeholder="Type your name" />
   <br><br>
   <button onclick="startGame()">▶ Start Homework</button>
@@ -108,6 +99,7 @@
   <div id="leaderboard"></div>
 
   <br>
+  <button onclick="shareResult()">📤 Send Homework on WhatsApp</button>
   <button onclick="location.reload()">🔄 Play Again</button>
 </div>
 
@@ -133,10 +125,10 @@
   }
 
   function startGame() {
-    name = document.getElementById("nameInput").value || "Friend";
+    name = document.getElementById("nameInput").value || "Student";
     document.getElementById("nameScreen").style.display = "none";
     document.getElementById("gameScreen").style.display = "block";
-    document.getElementById("welcome").innerText = "😊 Good luck, " + name + "!";
+    document.getElementById("welcome").innerText = "😊 All the best, " + name + "!";
     playSound(600, 0.2);
     nextQuestion();
   }
@@ -169,12 +161,12 @@
     options.forEach(num => {
       const btn = document.createElement("button");
       btn.innerText = num;
-      btn.onclick = () => checkAnswer(num, btn);
+      btn.onclick = () => checkAnswer(num);
       optDiv.appendChild(btn);
     });
   }
 
-  function checkAnswer(ans, btn) {
+  function checkAnswer(ans) {
     if (answered) return;
     answered = true;
 
@@ -220,6 +212,34 @@
       html += `<div class="leader">${i + 1}. ${e.name} — ${e.score}</div>`;
     });
     document.getElementById("leaderboard").innerHTML = html;
+  }
+
+  /* 📤 WHATSAPP SHARE */
+  function shareResult() {
+    const target = document.getElementById("endScreen");
+
+    html2canvas(target).then(canvas => {
+      canvas.toBlob(blob => {
+        const file = new File([blob], "homework-result.png", {
+          type: "image/png"
+        });
+
+        const text =
+          "📚 Homework Completed\n" +
+          "Name: " + name + "\n" +
+          "Score: " + score + " / 15\n" +
+          "School: MPPS PEDDURU";
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            text: text
+          });
+        } else {
+          alert("Please take screenshot and share manually.");
+        }
+      });
+    });
   }
 </script>
 
