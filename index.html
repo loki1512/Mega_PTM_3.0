@@ -6,45 +6,70 @@
 
   <style>
     body {
-      font-family: Comic Sans MS, cursive;
-      background: linear-gradient(#ffecd2, #fcb69f);
+      font-family: "Comic Sans MS", cursive;
+      background: linear-gradient(135deg, #fdeff9, #ecf0ff);
       text-align: center;
-      padding: 10px;
+      padding: 12px;
+      color: #333;
     }
 
-    h1 { font-size: 28px; }
+    h1 {
+      font-size: 30px;
+      margin-bottom: 6px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      margin: 12px auto;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+      max-width: 360px;
+    }
 
     .box {
-      font-size: 38px;
-      margin: 10px;
+      font-size: 40px;
+      margin: 12px 0;
     }
 
     button {
       font-size: 22px;
-      padding: 12px 20px;
+      padding: 12px 18px;
       margin: 6px;
       border-radius: 14px;
       border: none;
-      background: #4caf50;
+      background: #6c8cff;
       color: white;
+      min-width: 80px;
+    }
+
+    button:disabled {
+      background: #ccc;
     }
 
     input {
       font-size: 20px;
-      padding: 8px;
-      border-radius: 10px;
-      border: none;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
       text-align: center;
-      width: 80%;
+      width: 85%;
     }
 
     #result {
       font-size: 24px;
-      margin-top: 12px;
+      margin-top: 10px;
+      min-height: 30px;
+    }
+
+    .progress {
+      font-size: 18px;
+      margin-top: 6px;
+      color: #555;
     }
 
     .leader {
-      font-size: 22px;
+      font-size: 20px;
       margin: 6px;
     }
   </style>
@@ -53,10 +78,9 @@
 <body>
 
 <h1>🍎 Add & Pop 🍎</h1>
-<h1>🍎 Class 1 Homework 🍎</h1>
 
 <!-- NAME SCREEN -->
-<div id="nameScreen">
+<div id="nameScreen" class="card">
   <p>👋 What is your name?</p>
   <input id="nameInput" placeholder="Type your name" />
   <br><br>
@@ -64,9 +88,11 @@
 </div>
 
 <!-- GAME SCREEN -->
-<div id="gameScreen" style="display:none;">
+<div id="gameScreen" class="card" style="display:none;">
   <h2 id="welcome"></h2>
-  <p>Question <span id="qno"></span> / 15</p>
+  <div class="progress">
+    Question <span id="qno"></span> / 15
+  </div>
 
   <div id="question" class="box"></div>
   <div id="options"></div>
@@ -74,7 +100,7 @@
 </div>
 
 <!-- END SCREEN -->
-<div id="endScreen" style="display:none;">
+<div id="endScreen" class="card" style="display:none;">
   <h2>🎉 Homework Completed!</h2>
   <p id="finalScore"></p>
 
@@ -91,6 +117,7 @@
   let score = 0;
   let questionCount = 0;
   const TOTAL = 15;
+  let answered = false;
 
   /* 🔊 SOUND EFFECTS */
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -109,12 +136,13 @@
     name = document.getElementById("nameInput").value || "Friend";
     document.getElementById("nameScreen").style.display = "none";
     document.getElementById("gameScreen").style.display = "block";
-    document.getElementById("welcome").innerHTML = "😊 Good luck, " + name + "!";
+    document.getElementById("welcome").innerText = "😊 Good luck, " + name + "!";
     playSound(600, 0.2);
     nextQuestion();
   }
 
   function nextQuestion() {
+    answered = false;
     if (questionCount === TOTAL) {
       endGame();
       return;
@@ -135,23 +163,35 @@
       .filter(n => n > 0)
       .sort(() => Math.random() - 0.5);
 
-    document.getElementById("options").innerHTML = "";
+    const optDiv = document.getElementById("options");
+    optDiv.innerHTML = "";
+
     options.forEach(num => {
-      document.getElementById("options").innerHTML +=
-        `<button onclick="check(${num})">${num}</button>`;
+      const btn = document.createElement("button");
+      btn.innerText = num;
+      btn.onclick = () => checkAnswer(num, btn);
+      optDiv.appendChild(btn);
     });
   }
 
-  function check(ans) {
+  function checkAnswer(ans, btn) {
+    if (answered) return;
+    answered = true;
+
+    document.querySelectorAll("#options button")
+      .forEach(b => b.disabled = true);
+
     if (ans === correct) {
       score++;
-      document.getElementById("result").innerHTML = "🎉 Correct!";
+      document.getElementById("result").innerHTML = "✅ Correct!";
       playSound(800, 0.3);
-      setTimeout(nextQuestion, 800);
     } else {
-      document.getElementById("result").innerHTML = "❌ Try again!";
+      document.getElementById("result").innerHTML =
+        `❌ Wrong! Correct answer is ${correct}`;
       playSound(200, 0.3);
     }
+
+    setTimeout(nextQuestion, 1500);
   }
 
   function endGame() {
