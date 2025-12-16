@@ -1,396 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MPPS Pedduru Fun Zone!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #FF5733;
-            --secondary-color: #28a745;
-            --chalkboard-bg: #2e4e37;
-            --paper-bg: #fdfbf7;
-            --line-color: #a2a2a2;
-        }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add & Pop!</title>
 
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Patrick Hand', cursive, sans-serif; /* School font */
-            /* Chalkboard background texture */
-            background-color: var(--chalkboard-bg);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg %3E%3Cpolygon fill='%2333553d' points='100 57.1 64 93.1 71.5 100.6 100 72.1'/%3E%3Cpolygon fill='%23385d43' points='100 57.1 100 72.1 128.5 100.6 136 93.1'/%3E%3Cpolygon fill='%2333553d' points='100 142.9 136 106.9 128.5 99.4 100 127.9'/%3E%3Cpolygon fill='%23385d43' points='100 142.9 100 127.9 71.5 99.4 64 106.9'/%3E%3C/g%3E%3C/svg%3E");
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            color: #333;
-        }
+  <style>
+    body {
+      font-family: Comic Sans MS, cursive;
+      background: linear-gradient(#ffecd2, #fcb69f);
+      text-align: center;
+      padding: 10px;
+    }
 
-        #game-container { position: relative; width: 100vw; height: 100vh; }
+    h1 { font-size: 28px; }
 
-        /* --- Screens Styling (Notebook Paper Look) --- */
-        #start-screen, #end-screen, #thank-you-screen {
-            position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background-color: var(--paper-bg);
-            /* Lined paper effect */
-            background-image: repeating-linear-gradient(transparent, transparent 29px, var(--line-color) 30px);
-            z-index: 100; text-align: center; padding: 20px; box-sizing: border-box;
-            transition: opacity 0.3s ease;
-            border-radius: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            /* Red margin line on the left */
-            border-left: 5px solid #ff9999;
-        }
-        
-        #thank-you-screen { z-index: 110; background: var(--chalkboard-bg); color: white; border: 5px solid #8B4513; background-image: none;}
+    .box {
+      font-size: 38px;
+      margin: 10px;
+    }
 
-        h1 { color: #d35400; font-size: 2.2rem; margin-bottom: 5px; letter-spacing: 1px; }
-        h2 { color: #2c3e50; font-size: 1.4rem; margin: 5px 0 15px 0; }
-        
-        /* --- Visits Counter --- */
-        .counter-box {
-            background: rgba(255, 255, 255, 0.9);
-            border: 3px dashed #555;
-            padding: 8px 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            color: #555;
-        }
-        #visit-count { color: var(--primary-color); font-weight: bold; font-size: 1.3rem; }
+    button {
+      font-size: 22px;
+      padding: 12px 20px;
+      margin: 6px;
+      border-radius: 14px;
+      border: none;
+      background: #4caf50;
+      color: white;
+    }
 
-        .instructions { font-size: 1.3rem; color: #333; background: #fff3cd; padding: 15px; border: 2px solid #e0c387; border-radius: 15px; margin-bottom: 10px; }
-        .game-icon-large { font-size: 3.5rem; margin: 10px; animation: bounce 2s infinite; }
-        
-        /* --- Buttons (School eraser/block look) --- */
-        .btn {
-            padding: 12px 30px; font-size: 1.5rem; font-weight: bold; color: white;
-            border: 3px solid #1e7e34; border-radius: 8px; cursor: pointer;
-            box-shadow: 3px 3px 0px #1e7e34; margin-top: 15px;
-            transition: transform 0.1s, box-shadow 0.1s; background-color: var(--secondary-color);
-            font-family: 'Patrick Hand', cursive;
-        }
-        .btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #1e7e34; }
-        .btn-restart { background-color: #3498db; border-color: #21618c; box-shadow: 3px 3px 0px #21618c;}
-        .btn-restart:active { box-shadow: 0px 0px 0px #21618c; }
-        .btn-exit { background-color: #c0392b; border-color: #922b21; box-shadow: 3px 3px 0px #922b21; font-size: 1.2rem; padding: 10px 25px;}
-        .btn-exit:active { box-shadow: 0px 0px 0px #922b21; }
+    input {
+      font-size: 20px;
+      padding: 8px;
+      border-radius: 10px;
+      border: none;
+      text-align: center;
+      width: 80%;
+    }
 
-        /* --- Invitation Card --- */
-        .invite-card {
-            background: #fff; padding: 20px; border-radius: 2px; 
-            border: 4px solid #FF5733; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
-            margin: 20px 0; text-align: left; display: inline-block;
-            animation: slideUp 0.5s ease-out;
-            transform: rotate(-2deg); /* Slightly tilted look */
-        }
-        .invite-card p { margin: 8px 0; color: #333; font-size: 1.3rem;border-bottom: 1px dashed #ccc;}
-
-        /* --- Game Elements Common --- */
-        .game-item { position: absolute; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; touch-action: none;}
-        .game-item.popped { transform: scale(1.5) !important; opacity: 0; transition: all 0.3s ease-out; pointer-events: none; }
-
-        /* Game 1: Balloons */
-        .balloon {
-            bottom: -120px; width: 70px; height: 90px;
-            border-radius: 50%; color: white; font-weight: bold; font-size: 14px;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
-            animation: wobble 2s ease-in-out infinite alternate;
-            font-family: sans-serif; /* Keep balloon text simple */
-        }
-        .balloon::before { content: ''; position: absolute; bottom: -12px; left: 50%; width: 2px; height: 25px; background-color: rgba(0,0,0,0.3); transform: translateX(-50%); }
-
-        /* Game 2: Books & Game 3: Sweets */
-        .book-item, .sweet-item { font-size: 55px; filter: drop-shadow(3px 3px 2px rgba(0,0,0,0.3)); }
-        .book-item { animation: popIn 0.3s ease-out; }
-        .sweet-item { top: -60px; animation: spin 3s linear infinite; }
-
-        /* --- Score Display (Slate look) --- */
-        #score-container {
-            position: absolute; top: 10px; left: 10px;
-            background: #333; /* Slate dark gray */
-            border: 4px solid #8B4513; /* Wood frame */
-            padding: 8px 15px; border-radius: 5px;
-            font-size: 1.4rem; font-weight: bold; color: #eee; z-index: 50;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .score-pulse { animation: pulse 0.3s ease-in-out; }
-
-        /* --- Keyframe Animations --- */
-        @keyframes wobble { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(5px) rotate(3deg); } 100% { transform: translateX(-5px) rotate(-3deg); } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); color: #ffff00; } 100% { transform: scale(1); } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
+    #result {
+      font-size: 26px;
+      margin-top: 12px;
+    }
+  </style>
 </head>
+
 <body>
 
-    <div id="game-container">
-        <div id="score-container">Score: <span id="score">0</span>/15</div>
+<h1>🍎 Add & Pop 🍎</h1>
 
-        <div id="start-screen">
-            <h1>MPPS Pedduru Fun Zone!</h1>
-            <h2>Mega PTM Celebration</h2>
-            
-            <div class="counter-box">
-                🎒 Total Games Played by Parents & Villagers: <br>
-                <span id="visit-count">Loading...</span>
-            </div>
+<!-- NAME SCREEN -->
+<div id="nameScreen">
+  <p>👋 Hello! What is your name?</p>
+  <input id="nameInput" placeholder="Type your name" />
+  <br><br>
+  <button onclick="startGame()">▶ Start</button>
+</div>
 
-            <div id="game-instruction-block">
-                <div class="game-icon-large">❓</div>
-                <p class="instructions" style="background:none; border:none; font-weight: bold;">Click below to pick a random game!</p>
-            </div>
-            <button class="btn" id="start-btn" onclick="prepareGame()">Play Random Game!</button>
-        </div>
+<!-- GAME SCREEN -->
+<div id="gameScreen" style="display:none;">
+  <h2 id="welcome"></h2>
+  <p>Count and tap the correct answer!</p>
 
-        <div id="end-screen" style="display: none; opacity: 0;">
-            <h1>🎉 Fantastic Job! 🎉</h1>
-            <p style="font-size: 1.4rem;">You unlocked the official invitation!</p>
-            <div class="invite-card">
-                <p><strong>🏫 School:</strong> MPPS Pedduru</p>
-                <p><strong>📅 Date:</strong> 5th December 2025</p>
-                <p><strong>⏰ Time:</strong> 9:00 AM - 1:00 PM</p>
-                <p style="border:none; margin-top: 10px; text-align: center; font-size: 1.2rem;">
-                    ✨ Cultural Events • 🎮 Parents Games • 🍛 Grand Feast
-                </p>
-            </div>
-            <p style="color: var(--secondary-color); font-weight: bold; margin-bottom: 5px; font-size: 1.4rem;">We hope to see you there!</p>
-            <button class="btn btn-restart" onclick="resetGame()">Play Different Game</button>
-            <button class="btn btn-exit" onclick="exitGame()">Exit</button>
-        </div>
+  <div id="question" class="box"></div>
+  <div id="options"></div>
+  <div id="result"></div>
+</div>
 
-        <div id="thank-you-screen" style="display: none;">
-            <h1>Thank You!</h1>
-            <p style="font-size: 1.5rem; color: #eee;">Thanks for visiting MPPS Pedduru Fun Zone.</p>
-            <p style="font-size: 1.2rem; color: #ccc;">Don't forget the Mega PTM on Dec 5th!</p>
-            <p style="margin-top: 30px;">(You can close this tab now)</p>
-        </div>
-    </div>
+<script>
+  let name = "";
+  let a, b, correct;
 
-    <script>
-        // --- General Game State ---
-        const SCORE_LIMIT = 15;
-        let score = 0;
-        let gameActive = false;
-        let currentGameMode = null;
-        let spawnTimer;
+  /* 🔊 SOUND EFFECTS (Web Audio API) */
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // --- DOM Elements ---
-        const container = document.getElementById('game-container');
-        const scoreSpan = document.getElementById('score');
-        const scoreContainer = document.getElementById('score-container');
-        const startScreen = document.getElementById('start-screen');
-        const endScreen = document.getElementById('end-screen');
-        const thankYouScreen = document.getElementById('thank-you-screen');
-        const instructionBlock = document.getElementById('game-instruction-block');
-        const startBtn = document.getElementById('start-btn');
-        const visitCountSpan = document.getElementById('visit-count');
+  function playSound(freq, duration) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
+  }
 
-        // --- Assets ---
-        const balloonColors = ['#FF5733', '#28a745', '#3357FF', '#FF33A8', '#FFC300'];
-        const balloonMessages = ["Dec 5!", "Feast!", "Games!", "MPPS", "Pedduru"];
-        const bookEmojis = ['📚', '📕', '📖', '📘', '🎒', '✏️'];
-        const sweetEmojis = ['🍬', '🍭', '🧁', '🍩', '🍪'];
+  function startGame() {
+    name = document.getElementById("nameInput").value || "Friend";
+    document.getElementById("nameScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    document.getElementById("welcome").innerHTML = "😊 Welcome, " + name + "!";
+    playSound(600, 0.2); // welcome sound
+    newQuestion();
+  }
 
-        // --- Initial Setup: Visitor Counter ---
-        // This simulates a global counter using local storage on the user's device.
-        // It starts at a base number (e.g., 350) and increments on every play on this device.
-        function initCounter() {
-            let currentCount = localStorage.getItem('mpps_game_count');
-             // Base number to make it look active initially
-            const baseCount = 350;
-            
-            if (!currentCount) {
-                currentCount = baseCount;
-                localStorage.setItem('mpps_game_count', currentCount);
-            }
-            visitCountSpan.innerText = parseInt(currentCount).toLocaleString();
-        }
-        
-        function incrementCounter() {
-             let currentCount = parseInt(localStorage.getItem('mpps_game_count') || 350);
-             currentCount++;
-             localStorage.setItem('mpps_game_count', currentCount);
-             visitCountSpan.innerText = currentCount.toLocaleString();
-        }
+  function newQuestion() {
+    document.getElementById("result").innerHTML = "";
+    a = Math.floor(Math.random() * 5) + 1;
+    b = Math.floor(Math.random() * 5) + 1;
+    correct = a + b;
 
-        // Initialize counter on load
-        initCounter();
+    document.getElementById("question").innerHTML =
+      "🍎 ".repeat(a) + "<br> + <br>" + "🍎 ".repeat(b);
 
+    let options = [correct, correct + 1, correct - 1]
+      .filter(n => n > 0)
+      .sort(() => Math.random() - 0.5);
 
-        // --- Helper: Haptic Feedback ---
-        function vibrate(ms) { if ("vibrate" in navigator) { navigator.vibrate(ms); } }
+    document.getElementById("options").innerHTML = "";
+    options.forEach(num => {
+      document.getElementById("options").innerHTML +=
+        `<button onclick="check(${num})">${num}</button>`;
+    });
+  }
 
-        // --- Helper: General Item Tap Handler ---
-        function handleItemTap(item, SpecificMoveTimer = null) {
-            if(item.classList.contains('popped')) return;
-            vibrate(80);
-            if (SpecificMoveTimer) clearInterval(SpecificMoveTimer);
-            score++;
-            updateScoreDisplay();
-            item.classList.add('popped');
-            setTimeout(() => { if(item.parentNode) item.remove(); }, 300);
-            checkWinCondition();
-        }
+  function check(ans) {
+    if (ans === correct) {
+      document.getElementById("result").innerHTML =
+        "🎉 Correct, " + name + "!";
+      playSound(800, 0.3); // correct sound
+      setTimeout(newQuestion, 1200);
+    } else {
+      document.getElementById("result").innerHTML = "❌ Try again!";
+      playSound(200, 0.3); // wrong sound
+    }
+  }
+</script>
 
-        // --- Game Control Logic ---
-
-        function prepareGame() {
-             vibrate(50);
-             incrementCounter(); // Increment visits when they click play
-
-             startBtn.disabled = true;
-             startBtn.innerText = "Selecting...";
-
-             const modes = ['balloon', 'book', 'sweet'];
-             currentGameMode = modes[Math.floor(Math.random() * modes.length)];
-
-             let icon, text;
-             if (currentGameMode === 'balloon') {
-                 icon = '🎈'; text = 'Tap 15 Balloons as they float up!';
-             } else if (currentGameMode === 'book') {
-                 icon = '📚'; text = 'Tap 15 School Items quickly!';
-             } else {
-                 icon = '🍬'; text = 'Catch 15 Sweets falling down!';
-             }
-             
-             instructionBlock.innerHTML = `<div class="game-icon-large">${icon}</div><p class="instructions" style="background:none; border:none;">${text}</p>`;
-
-             setTimeout(() => {
-                 startBtn.innerText = "Start!";
-                 startBtn.disabled = false;
-                 startBtn.onclick = launchSelectedGame;
-             }, 1000);
-        }
-
-        function launchSelectedGame() {
-            vibrate(50);
-            startScreen.style.opacity = '0';
-            setTimeout(() => { startScreen.style.display = 'none'; }, 300);
-            
-            gameActive = true;
-            score = 0;
-            updateScoreDisplay();
-
-            if (currentGameMode === 'balloon') {
-                spawnTimer = setInterval(spawnBalloon, 800);
-            } else if (currentGameMode === 'book') {
-                spawnTimer = setInterval(spawnBook, 900);
-            } else if (currentGameMode === 'sweet') {
-                spawnTimer = setInterval(spawnSweet, 600);
-            }
-        }
-
-        function resetGame() {
-            vibrate(50);
-            endScreen.style.opacity = '0';
-            setTimeout(() => { 
-                endScreen.style.display = 'none'; 
-                startScreen.style.display = 'flex';
-                startScreen.style.opacity = '1';
-                instructionBlock.innerHTML = `<div class="game-icon-large">❓</div><p class="instructions" style="background:none; border:none; font-weight: bold;">Click below to pick a random game!</p>`;
-                startBtn.innerText = "Play Random Game!";
-                startBtn.onclick = prepareGame;
-            }, 300);
-
-            clearInterval(spawnTimer);
-            document.querySelectorAll('.game-item').forEach(b => b.remove());
-            gameActive = false;
-        }
-
-        // --- New Exit Function ---
-        function exitGame() {
-             vibrate(50);
-             endScreen.style.display = 'none';
-             thankYouScreen.style.display = 'flex';
-        }
-
-        function updateScoreDisplay() {
-            scoreSpan.innerText = score;
-            scoreContainer.classList.remove('score-pulse');
-            void scoreContainer.offsetWidth; 
-            scoreContainer.classList.add('score-pulse');
-        }
-
-        function checkWinCondition() {
-            if (score >= SCORE_LIMIT) {
-                gameActive = false;
-                clearInterval(spawnTimer);
-                setTimeout(() => {
-                    vibrate([100, 50, 100]);
-                    endScreen.style.display = 'flex';
-                    setTimeout(() => { endScreen.style.opacity = '1'; }, 50);
-                }, 800);
-            }
-        }
-
-        // --- GAME MECHANICS (Same as before) ---
-        function spawnBalloon() {
-            if (!gameActive) return;
-            const balloon = document.createElement('div');
-            balloon.classList.add('game-item', 'balloon');
-            balloon.style.left = Math.random() * (window.innerWidth - 80) + 'px';
-            balloon.style.backgroundColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
-            balloon.innerText = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
-            container.appendChild(balloon);
-            let bottomPos = -120;
-            let speed = window.innerHeight / (Math.random() * 200 + 300); 
-            const thisMoveTimer = setInterval(() => {
-                if (!gameActive || balloon.classList.contains('popped')) { clearInterval(thisMoveTimer); return; }
-                bottomPos += speed; balloon.style.bottom = bottomPos + 'px';
-                if (bottomPos > window.innerHeight + 50) { clearInterval(thisMoveTimer); balloon.remove(); }
-            }, 16);
-            addTapListeners(balloon, thisMoveTimer);
-        }
-
-        function spawnBook() {
-            if (!gameActive) return;
-            const book = document.createElement('div');
-            book.classList.add('game-item', 'book-item');
-            book.innerText = bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
-            const maxX = window.innerWidth - 60; const maxY = window.innerHeight - 100;
-            book.style.left = (Math.random() * maxX) + 'px';
-            book.style.top = (70 + Math.random() * (maxY - 100)) + 'px'; // Adjusted for new notebook margins
-            container.appendChild(book);
-            const disappearTimer = setTimeout(() => {
-                 if (book.parentNode && !book.classList.contains('popped')) {
-                     book.style.opacity = '0'; setTimeout(() => book.remove(), 300);
-                 }
-            }, 1200);
-            addTapListeners(book, disappearTimer, true); 
-        }
-
-        function spawnSweet() {
-             if (!gameActive) return;
-            const sweet = document.createElement('div');
-            sweet.classList.add('game-item', 'sweet-item');
-            sweet.innerText = sweetEmojis[Math.floor(Math.random() * sweetEmojis.length)];
-            sweet.style.left = Math.random() * (window.innerWidth - 60) + 'px';
-            container.appendChild(sweet);
-            let topPos = -60;
-            let speed = window.innerHeight / (Math.random() * 150 + 200); 
-            const thisMoveTimer = setInterval(() => {
-                if (!gameActive || sweet.classList.contains('popped')) { clearInterval(thisMoveTimer); return; }
-                topPos += speed; sweet.style.top = topPos + 'px';
-                if (topPos > window.innerHeight) { clearInterval(thisMoveTimer); sweet.remove(); }
-            }, 16);
-            addTapListeners(sweet, thisMoveTimer);
-        }
-
-        function addTapListeners(element, timerId, isTimeout = false) {
-             const handler = (e) => { e.preventDefault();
-                 if(isTimeout) clearTimeout(timerId); else clearInterval(timerId);
-                 handleItemTap(element);
-             };
-             element.addEventListener('touchstart', handler, {passive: false});
-             element.addEventListener('mousedown', handler);
-        }
-    </script>
 </body>
 </html>
