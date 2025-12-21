@@ -4,7 +4,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add & Pop! Homework</title>
 
+  <!-- Screenshot -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
   <style>
     body {
@@ -17,13 +20,9 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
     }
 
-    h1 {
-      font-size: 34px;
-      margin-bottom: 6px;
-    }
+    h1 { font-size: 34px; margin-bottom: 6px; }
 
     .card {
       background: white;
@@ -67,13 +66,14 @@
       margin: 6px;
       border-radius: 14px;
       border: none;
-      background: #6c8cff;
       color: white;
     }
-    button:disabled { background: #ccc; }
 
     .whatsapp-btn { background: #25D366; font-size: 26px; }
     .replay-btn { background: #ffb300; }
+    .submit-btn { background: #007bff; }
+
+    button:disabled { background: #ccc; }
 
     input {
       font-size: 22px;
@@ -85,8 +85,8 @@
     }
 
     #result {
-      font-size: 40px;
-      margin-top: 12px;
+      font-size: 32px;
+      margin-top: 6px;
       min-height: 40px;
     }
 
@@ -102,24 +102,24 @@
       animation: confetti-fall 1s ease-out forwards;
       font-size: 38px;
     }
+
     @keyframes confetti-fall {
-      from { transform: translateY(-100px); opacity: 1; }
+      from { transform: translateY(-120px); opacity: 1; }
       to { transform: translateY(300px); opacity: 0; }
     }
 
     .teacher {
       font-size: 60px;
-      animation: bounce 1s infinite alternate;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      animation: bounce 1.5s infinite alternate;
     }
 
-    /* NEW FOOTER */
     footer {
       margin-top: auto;
-      padding: 6px;
+      padding: 8px;
       font-size: 16px;
-      color: #555;
-      opacity: 0.8;
+      color: #666;
+      opacity: 0.95;
     }
   </style>
 </head>
@@ -128,13 +128,15 @@
 
 <h1>🍎 Add & Pop 🍌</h1>
 
+<!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
-  <p>👋</p>
-  <input id="nameInput" placeholder="Name" />
+  <p>Type your name</p>
+  <input id="nameInput" />
   <br><br>
-  <button onclick="startGame()">▶</button>
+  <button onclick="startGame()" class="submit-btn">Start</button>
 </div>
 
+<!-- GAME SCREEN -->
 <div id="gameScreen" class="card" style="display:none;">
   <div class="progress"><span id="qno"></span> / 15</div>
   <div id="question"></div>
@@ -142,13 +144,14 @@
   <div id="result"></div>
 </div>
 
+<!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
   <div class="teacher">👩‍🏫</div>
-  <h2 id="endCelebration">🎉</h2>
+  <h2 id="endCelebration">🎉 Perfect Exercise!</h2>
   <p id="finalScore"></p>
 
-  <h3>🏆</h3>
-  <div id="leaderboard"></div>
+  <h3>🏆 Leaderboard</h3>
+  <div id="leaderboard">Loading...</div>
 
   <br>
   <button onclick="shareResult()" class="whatsapp-btn">🟢 WhatsApp</button>
@@ -168,11 +171,13 @@
   const fruits = ["🍎","🍌","🍇","🍓"];
 
   const ctx = new (window.AudioContext||window.webkitAudioContext)();
+
   function sound(f,d){
     const o=ctx.createOscillator();
     const g=ctx.createGain();
     o.frequency.value=f;
-    o.connect(g); g.connect(ctx.destination);
+    o.connect(g); 
+    g.connect(ctx.destination);
     o.start();
     g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+d);
     o.stop(ctx.currentTime+d);
@@ -196,7 +201,6 @@
 
   function nextQ(){
     answered=false;
-
     if(questionCount===TOTAL){ endGame(); return; }
 
     questionCount++;
@@ -210,14 +214,13 @@
     const f1=fruits[Math.floor(Math.random()*fruits.length)];
     const f2=fruits[Math.floor(Math.random()*fruits.length)];
 
-    let html="";
-    html+=`<div class="fruits">${f1.repeat(a)}</div><br>`;
-    html+=`<div style="font-size:36px;">+</div><br>`;
-    html+=`<div class="fruits">${f2.repeat(b)}</div>`;
-
-    document.getElementById("question").innerHTML=html;
+    document.getElementById("question").innerHTML=
+      `<div class="fruits">${f1.repeat(a)}</div><br>
+       <div style="font-size:36px;">+</div><br>
+       <div class="fruits">${f2.repeat(b)}</div>`;
 
     const ops=[correct,correct+1,correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
+
     const optDiv=document.getElementById("options");
     optDiv.innerHTML="";
 
@@ -230,7 +233,7 @@
   }
 
   function check(v){
-    if(answered)return;
+    if(answered) return;
     answered=true;
 
     document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
@@ -238,18 +241,21 @@
     if(v===correct){
       score++;
       streak++;
-      document.getElementById("result").innerHTML="✨";
+      let phrases=["Good job!","Great!","Nice!","Super!"];
+      let msg=phrases[Math.floor(Math.random()*phrases.length)];
+      document.getElementById("result").innerHTML=msg;
+
       document.getElementById("question").classList.add("correct-anim");
       sound(800,0.3);
 
-      if(streak===5)confettiBurst("⭐");
-      if(streak===10)confettiBurst("🌟");
-    } else {
+      if(streak===5){ confettiBurst("⭐"); document.getElementById("result").innerHTML="5 in a row! ⭐"; }
+      if(streak===10){ confettiBurst("🌟"); document.getElementById("result").innerHTML="10 in a row! 🌟"; }
+    }
+    else {
       streak=0;
-      document.getElementById("result").innerHTML="❌";
+      document.getElementById("result").innerHTML="Try again next time!";
       document.getElementById("question").classList.add("wrong-anim");
       sound(200,0.3);
-      confettiBurst("💦");
     }
 
     setTimeout(()=>{
@@ -258,38 +264,59 @@
     },1200);
   }
 
+  function sendToGoogle(){
+    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSe5T6E5S06KfcE0ebGutxyLGAYqzGMVS4lq8cZsUUS9JXtL7g/formResponse";
+    const data=`entry.614166214=${encodeURIComponent(name)}&entry.1440673296=${encodeURIComponent(score)}`;
+
+    fetch(formURL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:data
+    });
+  }
+
+  async function fetchCentralLeaderboard(){
+    const csvUrl="https://docs.google.com/spreadsheets/d/2PACX-1vSSl1CFOjQQvN_Q1gHbXw4RSbyt81wOZpxTRvKjyGSumhSPwCCXmorBg8Q_6-HBHKrFAyKpMPH99N1_/gviz/tq?tqx=out:csv";
+
+    try {
+      const response = await fetch(csvUrl);
+      const csvText = await response.text();
+
+      const parsed = Papa.parse(csvText, { header: true });
+      const data = parsed.data;
+
+      const rows = data
+        .filter(r => r.Name && r.Score)
+        .sort((a,b)=>parseInt(b.Score)-parseInt(a.Score));
+
+      let html="";
+      rows.slice(0,10).forEach((r,i)=>{
+        html+=`<div class="leader">${i+1}. ${r.Name} — ${r.Score}</div>`;
+      });
+
+      document.getElementById("leaderboard").innerHTML=html;
+
+    } catch(e){
+      document.getElementById("leaderboard").innerHTML="Leaderboard unavailable";
+    }
+  }
+
   function endGame(){
     document.getElementById("gameScreen").style.display="none";
     document.getElementById("endScreen").style.display="block";
 
     if(score===15){
       confettiBurst("🎉");
-      document.getElementById("endCelebration").innerHTML="🎉";
+      document.getElementById("endCelebration").innerHTML="Perfect Exercise! 🎉";
     } else {
-      document.getElementById("endCelebration").innerHTML="👏";
+      document.getElementById("endCelebration").innerHTML="Congratulations!";
     }
 
-    document.getElementById("finalScore").innerHTML=`${score} / 15`;
+    document.getElementById("finalScore").innerHTML=`Hey ${name}, you scored ${score}/15. Way to go!`;
 
-    saveBoard();
-    showBoard();
-  }
-
-  function saveBoard(){
-    let board=JSON.parse(localStorage.getItem("board"))||[];
-    board.push({name,score});
-    board.sort((a,b)=>b.score-a.score);
-    board=board.slice(0,5);
-    localStorage.setItem("board",JSON.stringify(board));
-  }
-
-  function showBoard(){
-    let board=JSON.parse(localStorage.getItem("board"))||[];
-    let h="";
-    board.forEach((e,i)=>{
-      h+=`<div class="leader">${i+1}. ${e.name} — ${e.score}</div>`;
-    });
-    document.getElementById("leaderboard").innerHTML=h;
+    sendToGoogle();
+    setTimeout(fetchCentralLeaderboard, 1000);
   }
 
   function shareResult(){
