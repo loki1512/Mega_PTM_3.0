@@ -6,7 +6,7 @@
 
   <!-- Screenshot -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <!-- PapaParse for CSV parsing -->
+  <!-- CSV Parser -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
   <style>
@@ -15,11 +15,11 @@
       background: linear-gradient(135deg, #fdeff9, #ecf0ff);
       text-align: center;
       padding: 12px;
-      color: #333;
       margin: 0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      color: #333;
     }
 
     h1 { font-size: 34px; margin-bottom: 6px; }
@@ -61,45 +61,35 @@
     }
 
     button {
-      font-size: 24px;
-      padding: 12px 20px;
-      margin: 6px;
-      border-radius: 14px;
       border: none;
-      color: white;
+      cursor: pointer;
     }
-    button.answer-btn {
-  font-size: 32px;
-  padding: 14px 26px;
-  margin: 10px;
-  border-radius: 16px;
-  border: 3px solid #555;
-  background: white;
-  color: #222;
-  min-width: 80px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  cursor: pointer;
-}
 
-button.answer-btn:disabled {
-  opacity: 0.4;
-}
+    .answer-btn {
+      font-size: 32px;
+      padding: 12px 24px;
+      margin: 8px;
+      border-radius: 16px;
+      border: 3px solid #555;
+      background: white;
+      color: #222;
+      min-width: 80px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
 
-button.answer-btn:active {
-  transform: scale(0.95);
-}
+    .answer-btn:disabled { opacity: 0.4; }
 
-    .whatsapp-btn { background: #25D366; font-size: 26px; }
-    .replay-btn { background: #ffb300; }
-    .submit-btn { background: #007bff; }
+    .answer-btn:active { transform: scale(0.94); }
 
-    button:disabled { background: #ccc; }
+    .whatsapp-btn { background: #25D366; color:white; font-size: 26px; padding:14px 22px; border-radius:14px; }
+    .replay-btn { background: #ffb300; color:white; font-size:26px; padding:14px 22px; border-radius:14px; }
+    .submit-btn { background: #007bff; color:white; font-size:26px; padding:14px 22px; border-radius:14px; }
 
     input {
       font-size: 22px;
       padding: 10px;
       border-radius: 12px;
-      border: 1px solid #ddd;
+      border: 2px solid #aaa;
       text-align: center;
       width: 85%;
     }
@@ -114,6 +104,12 @@ button.answer-btn:active {
 
     .leader { font-size: 22px; margin: 6px; }
 
+    .teacher {
+      font-size: 60px;
+      margin-bottom: 6px;
+      animation: bounce 1.5s infinite alternate;
+    }
+
     .confetti {
       position: fixed;
       top: 0; left: 0;
@@ -122,16 +118,9 @@ button.answer-btn:active {
       animation: confetti-fall 1s ease-out forwards;
       font-size: 38px;
     }
-
     @keyframes confetti-fall {
       from { transform: translateY(-120px); opacity: 1; }
       to { transform: translateY(300px); opacity: 0; }
-    }
-
-    .teacher {
-      font-size: 60px;
-      margin-bottom: 6px;
-      animation: bounce 1.5s infinite alternate;
     }
 
     footer {
@@ -148,7 +137,6 @@ button.answer-btn:active {
 
 <h1>🍎 Add & Pop 🍌</h1>
 
-<!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
   <p>Type your name</p>
   <input id="nameInput" />
@@ -156,7 +144,6 @@ button.answer-btn:active {
   <button onclick="startGame()" class="submit-btn">Start</button>
 </div>
 
-<!-- GAME SCREEN -->
 <div id="gameScreen" class="card" style="display:none;">
   <div class="progress"><span id="qno"></span> / 15</div>
   <div id="question"></div>
@@ -164,10 +151,9 @@ button.answer-btn:active {
   <div id="result"></div>
 </div>
 
-<!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
   <div class="teacher">👩‍🏫</div>
-  <h2 id="endCelebration">🎉 Perfect Exercise!</h2>
+  <h2 id="endCelebration"></h2>
   <p id="finalScore"></p>
 
   <h3>🏆 Leaderboard</h3>
@@ -215,7 +201,6 @@ button.answer-btn:active {
     name=document.getElementById("nameInput").value||"Friend";
     document.getElementById("nameScreen").style.display="none";
     document.getElementById("gameScreen").style.display="block";
-    sound(600,0.2);
     nextQ();
   }
 
@@ -241,53 +226,47 @@ button.answer-btn:active {
 
     const ops=[correct,correct+1,correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
 
-    const optDiv=document.getElementById("options");
-    optDiv.innerHTML="";
+    const optionsDiv=document.getElementById("options");
+    optionsDiv.innerHTML="";
 
-    ops.forEach(v=>{
+    ops.forEach(num=>{
       const btn=document.createElement("button");
-      btn.className = "answer-btn";
-      btn.innerText=v;
-      btn.onclick=()=>check(v);
-      optDiv.appendChild(btn);
+      btn.innerText=num;
+      btn.className="answer-btn";
+      btn.onclick=()=>check(num);
+      optionsDiv.appendChild(btn);
     });
   }
 
-  function check(v){
+  function check(val){
     if(answered) return;
     answered=true;
 
-    document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
+    document.querySelectorAll(".answer-btn").forEach(b=>b.disabled=true);
 
-    if(v===correct){
+    if(val===correct){
       score++;
       streak++;
-      let phrases=["Good job!","Great!","Nice!","Super!"];
-      let msg=phrases[Math.floor(Math.random()*phrases.length)];
+      let msg=["Good job!","Great!","Super!","Nice!"][Math.floor(Math.random()*4)];
       document.getElementById("result").innerHTML=msg;
-
-      document.getElementById("question").classList.add("correct-anim");
       sound(800,0.3);
 
-      if(streak===5){ confettiBurst("⭐"); document.getElementById("result").innerHTML="5 in a row! ⭐"; }
-      if(streak===10){ confettiBurst("🌟"); document.getElementById("result").innerHTML="10 in a row! 🌟"; }
+      if(streak===5) { document.getElementById("result").innerHTML="5 in a row! ⭐"; confettiBurst("⭐"); }
+      if(streak===10){ document.getElementById("result").innerHTML="10 in a row! 🌟"; confettiBurst("🌟"); }
     }
     else {
       streak=0;
       document.getElementById("result").innerHTML="Try again next time!";
-      document.getElementById("question").classList.add("wrong-anim");
       sound(200,0.3);
     }
 
-    setTimeout(()=>{
-      document.getElementById("question").classList.remove("correct-anim","wrong-anim");
-      nextQ();
-    },1200);
+    setTimeout(nextQ,1200);
   }
 
   function sendToGoogle(){
-    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSe5T6E5S06KfcE0ebGutxyLGAYqzGMVS4lq8cZsUUS9JXtL7g/formResponse";
-    const data=`entry.614166214=${encodeURIComponent(name)}&entry.1440673296=${encodeURIComponent(score)}`;
+    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSfd0N5AF5ifJ6nt3r3PypAGzB8W35Vq2aaEl2liRuvotIiIug/formResponse";
+    const data =
+      `entry.645887948=${encodeURIComponent(name)}&entry.792395446=${encodeURIComponent(score)}`;
 
     fetch(formURL,{
       method:"POST",
@@ -298,16 +277,14 @@ button.answer-btn:active {
   }
 
   async function fetchCentralLeaderboard(){
-    const csvUrl="https://docs.google.com/spreadsheets/d/2PACX-1vSSl1CFOjQQvN_Q1gHbXw4RSbyt81wOZpxTRvKjyGSumhSPwCCXmorBg8Q_6-HBHKrFAyKpMPH99N1_/gviz/tq?tqx=out:csv";
+    const csvURL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5g7-A90Fi5k_e8q_nEvUc-wuBdcVH7lu0MDEfWF9YCFajt8i-OEGJSgvE3sVkKQlQ13qHw0M_m2vc/pub?output=csv";
 
     try {
-      const response = await fetch(csvUrl);
-      const csvText = await response.text();
-
-      const parsed = Papa.parse(csvText, { header: true });
-      const data = parsed.data;
-
-      const rows = data
+      const res = await fetch(csvURL);
+      const text = await res.text();
+      const parsed = Papa.parse(text, { header: true });
+      const rows = parsed.data
         .filter(r => r.Name && r.Score)
         .sort((a,b)=>parseInt(b.Score)-parseInt(a.Score));
 
@@ -317,8 +294,8 @@ button.answer-btn:active {
       });
 
       document.getElementById("leaderboard").innerHTML=html;
-
-    } catch(e){
+    }
+    catch(e){
       document.getElementById("leaderboard").innerHTML="Leaderboard unavailable";
     }
   }
@@ -328,25 +305,26 @@ button.answer-btn:active {
     document.getElementById("endScreen").style.display="block";
 
     if(score===15){
+      document.getElementById("endCelebration").innerHTML="🎉 Perfect Exercise!";
       confettiBurst("🎉");
-      document.getElementById("endCelebration").innerHTML="Perfect Exercise! 🎉";
     } else {
       document.getElementById("endCelebration").innerHTML="Congratulations!";
     }
 
-    document.getElementById("finalScore").innerHTML=`Hey ${name}, you scored ${score}/15. Way to go!`;
+    document.getElementById("finalScore").innerHTML =
+      `Hey ${name}, you scored ${score}/15. Way to go!`;
 
     sendToGoogle();
-    setTimeout(fetchCentralLeaderboard, 1000);
+    setTimeout(fetchCentralLeaderboard,1000);
   }
 
   function shareResult(){
-    const t=document.getElementById("endScreen");
-    html2canvas(t).then(c=>{
-      c.toBlob(b=>{
-        const f=new File([b],"homework.png",{type:"image/png"});
-        if(navigator.canShare&&navigator.canShare({files:[f]})){
-          navigator.share({files:[f]});
+    const node=document.getElementById("endScreen");
+    html2canvas(node).then(canvas=>{
+      canvas.toBlob(blob=>{
+        const file=new File([blob],"homework.png",{type:"image/png"});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({files:[file]});
         }
       });
     });
