@@ -13,6 +13,11 @@
       text-align: center;
       padding: 12px;
       color: #333;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     h1 {
@@ -40,20 +45,14 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    .correct-anim {
-      animation: bounce 0.6s ease;
-    }
-
+    .correct-anim { animation: bounce 0.6s ease; }
     @keyframes bounce {
       0% { transform: scale(1); }
       30% { transform: scale(1.3); }
       100% { transform: scale(1); }
     }
 
-    .wrong-anim {
-      animation: shake 0.4s ease;
-    }
-
+    .wrong-anim { animation: shake 0.4s ease; }
     @keyframes shake {
       0% { transform: translateX(0); }
       25% { transform: translateX(-6px); }
@@ -71,19 +70,10 @@
       background: #6c8cff;
       color: white;
     }
+    button:disabled { background: #ccc; }
 
-    button:disabled {
-      background: #ccc;
-    }
-
-    .whatsapp-btn {
-      background: #25D366;
-      font-size: 26px;
-    }
-
-    .replay-btn {
-      background: #ffb300;
-    }
+    .whatsapp-btn { background: #25D366; font-size: 26px; }
+    .replay-btn { background: #ffb300; }
 
     input {
       font-size: 22px;
@@ -100,18 +90,10 @@
       min-height: 40px;
     }
 
-    .progress {
-      font-size: 20px;
-      color: #555;
-      margin-bottom: 10px;
-    }
+    .progress { font-size: 20px; margin-bottom: 10px; color: #555; }
 
-    .leader {
-      font-size: 22px;
-      margin: 6px;
-    }
+    .leader { font-size: 22px; margin: 6px; }
 
-    /* Confetti */
     .confetti {
       position: fixed;
       top: 0; left: 0;
@@ -120,7 +102,6 @@
       animation: confetti-fall 1s ease-out forwards;
       font-size: 38px;
     }
-
     @keyframes confetti-fall {
       from { transform: translateY(-100px); opacity: 1; }
       to { transform: translateY(300px); opacity: 0; }
@@ -131,6 +112,15 @@
       animation: bounce 1s infinite alternate;
       margin-bottom: 10px;
     }
+
+    /* NEW FOOTER */
+    footer {
+      margin-top: auto;
+      padding: 6px;
+      font-size: 16px;
+      color: #555;
+      opacity: 0.8;
+    }
   </style>
 </head>
 
@@ -138,7 +128,6 @@
 
 <h1>🍎 Add & Pop 🍌</h1>
 
-<!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
   <p>👋</p>
   <input id="nameInput" placeholder="Name" />
@@ -146,16 +135,13 @@
   <button onclick="startGame()">▶</button>
 </div>
 
-<!-- GAME SCREEN -->
 <div id="gameScreen" class="card" style="display:none;">
   <div class="progress"><span id="qno"></span> / 15</div>
-
   <div id="question"></div>
   <div id="options"></div>
   <div id="result"></div>
 </div>
 
-<!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
   <div class="teacher">👩‍🏫</div>
   <h2 id="endCelebration">🎉</h2>
@@ -169,6 +155,8 @@
   <button onclick="location.reload()" class="replay-btn">🔄 Replay</button>
 </div>
 
+<footer>An MPPS Pedduru Initiative</footer>
+
 <script>
   let name = "";
   let score = 0;
@@ -179,27 +167,27 @@
   let answered = false;
   const fruits = ["🍎","🍌","🍇","🍓"];
 
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
   function sound(f,d){
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.frequency.value = f;
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    o.frequency.value=f;
     o.connect(g); g.connect(ctx.destination);
     o.start();
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
-    o.stop(ctx.currentTime + d);
+    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+d);
+    o.stop(ctx.currentTime+d);
   }
 
   function confettiBurst(symbol){
-    const c = document.createElement("div");
-    c.className = "confetti";
-    c.textContent = symbol;
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.textContent=symbol;
     document.body.appendChild(c);
     setTimeout(()=>c.remove(),900);
   }
 
   function startGame(){
-    name = document.getElementById("nameInput").value || "Friend";
+    name=document.getElementById("nameInput").value||"Friend";
     document.getElementById("nameScreen").style.display="none";
     document.getElementById("gameScreen").style.display="block";
     sound(600,0.2);
@@ -207,37 +195,34 @@
   }
 
   function nextQ(){
-    answered = false;
+    answered=false;
 
-    if(questionCount === TOTAL){
-      endGame();
-      return;
-    }
+    if(questionCount===TOTAL){ endGame(); return; }
 
     questionCount++;
-    document.getElementById("qno").innerHTML = questionCount;
-    document.getElementById("result").innerHTML = "";
+    document.getElementById("qno").innerHTML=questionCount;
+    document.getElementById("result").innerHTML="";
 
-    const a = Math.floor(Math.random()*5)+1;
-    const b = Math.floor(Math.random()*5)+1;
-    correct = a + b;
+    const a=Math.floor(Math.random()*5)+1;
+    const b=Math.floor(Math.random()*5)+1;
+    correct=a+b;
 
-    const f1 = fruits[Math.floor(Math.random()*fruits.length)];
-    const f2 = fruits[Math.floor(Math.random()*fruits.length)];
+    const f1=fruits[Math.floor(Math.random()*fruits.length)];
+    const f2=fruits[Math.floor(Math.random()*fruits.length)];
 
     let html="";
-    html += `<div class="fruits">${f1.repeat(a)}</div><br>`;
-    html += `<div style="font-size:36px;">+</div><br>`;
-    html += `<div class="fruits">${f2.repeat(b)}</div>`;
+    html+=`<div class="fruits">${f1.repeat(a)}</div><br>`;
+    html+=`<div style="font-size:36px;">+</div><br>`;
+    html+=`<div class="fruits">${f2.repeat(b)}</div>`;
 
-    document.getElementById("question").innerHTML = html;
+    document.getElementById("question").innerHTML=html;
 
-    const ops=[correct, correct+1, correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
-    const optDiv = document.getElementById("options");
+    const ops=[correct,correct+1,correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
+    const optDiv=document.getElementById("options");
     optDiv.innerHTML="";
 
     ops.forEach(v=>{
-      const btn = document.createElement("button");
+      const btn=document.createElement("button");
       btn.innerText=v;
       btn.onclick=()=>check(v);
       optDiv.appendChild(btn);
@@ -245,8 +230,8 @@
   }
 
   function check(v){
-    if(answered) return;
-    answered = true;
+    if(answered)return;
+    answered=true;
 
     document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 
@@ -257,10 +242,9 @@
       document.getElementById("question").classList.add("correct-anim");
       sound(800,0.3);
 
-      if(streak===5) confettiBurst("⭐");
-      if(streak===10) confettiBurst("🌟");
-    }
-    else {
+      if(streak===5)confettiBurst("⭐");
+      if(streak===10)confettiBurst("🌟");
+    } else {
       streak=0;
       document.getElementById("result").innerHTML="❌";
       document.getElementById("question").classList.add("wrong-anim");
@@ -285,22 +269,22 @@
       document.getElementById("endCelebration").innerHTML="👏";
     }
 
-    document.getElementById("finalScore").innerHTML = `${score} / 15`;
+    document.getElementById("finalScore").innerHTML=`${score} / 15`;
 
     saveBoard();
     showBoard();
   }
 
   function saveBoard(){
-    let board = JSON.parse(localStorage.getItem("board"))||[];
+    let board=JSON.parse(localStorage.getItem("board"))||[];
     board.push({name,score});
     board.sort((a,b)=>b.score-a.score);
-    board = board.slice(0,5);
+    board=board.slice(0,5);
     localStorage.setItem("board",JSON.stringify(board));
   }
 
   function showBoard(){
-    let board = JSON.parse(localStorage.getItem("board"))||[];
+    let board=JSON.parse(localStorage.getItem("board"))||[];
     let h="";
     board.forEach((e,i)=>{
       h+=`<div class="leader">${i+1}. ${e.name} — ${e.score}</div>`;
@@ -313,7 +297,7 @@
     html2canvas(t).then(c=>{
       c.toBlob(b=>{
         const f=new File([b],"homework.png",{type:"image/png"});
-        if(navigator.canShare && navigator.canShare({files:[f]})){
+        if(navigator.canShare&&navigator.canShare({files:[f]})){
           navigator.share({files:[f]});
         }
       });
