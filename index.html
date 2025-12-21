@@ -1,126 +1,147 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add & Pop! Homework</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add & Pop! Homework</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- Screenshot -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
-<style>
-  body {
-    margin: 0;
-    font-family: "Comic Neue", sans-serif;
-    background: linear-gradient(180deg, #fdeff9, #ecf0ff);
-    text-align: center;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  <style>
+    body {
+      font-family: "Comic Sans MS", cursive;
+      background: linear-gradient(135deg, #fdeff9, #ecf0ff);
+      text-align: center;
+      padding: 12px;
+      color: #333;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-  h1 {
-    font-size: 40px;
-    margin-top: 12px;
-  }
+    h1 { font-size: 34px; margin-bottom: 6px; }
 
-  .card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 16px auto;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-    max-width: 380px;
-    width: 90%;
-  }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      margin: 12px auto;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      max-width: 380px;
+    }
 
-  input {
-    font-size: 24px;
-    padding: 12px;
-    border: 2px solid #aaa;
-    border-radius: 12px;
-    width: 85%;
-    margin-bottom: 12px;
-  }
+    .fruits {
+      font-size: 48px;
+      display: inline-block;
+      animation: drop 0.5s ease-out;
+    }
 
-  button {
-    font-size: 26px;
-    padding: 14px 22px;
-    border-radius: 14px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    width: 80%;
-    margin-top: 10px;
-  }
+    @keyframes drop {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
-  .start-btn {
-    background: #00C853; /* brighter green */
-    box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
-  }
+    .correct-anim { animation: bounce 0.6s ease; }
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
 
-  .whatsapp-btn {
-    background: #25D366;
-    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
+    .wrong-anim { animation: shake 0.4s ease; }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
 
-  .replay-btn {
-    background: #FFB300;
-    box-shadow: 0 4px 10px rgba(255, 179, 0, 0.3);
-  }
+    button {
+      font-size: 24px;
+      padding: 12px 20px;
+      margin: 6px;
+      border-radius: 14px;
+      border: none;
+      color: white;
+    }
+    button.answer-btn {
+  font-size: 32px;
+  padding: 14px 26px;
+  margin: 10px;
+  border-radius: 16px;
+  border: 3px solid #555;
+  background: white;
+  color: #222;
+  min-width: 80px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
 
-  .whatsapp-icon {
-    font-size: 30px;
-  }
+button.answer-btn:disabled {
+  opacity: 0.4;
+}
 
-  .fruits {
-    font-size: 54px;
-    animation: drop 0.45s ease-out;
-  }
+button.answer-btn:active {
+  transform: scale(0.95);
+}
 
-  @keyframes drop {
-    0% { transform: translateY(-40px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
+    .whatsapp-btn { background: #25D366; font-size: 26px; }
+    .replay-btn { background: #ffb300; }
+    .submit-btn { background: #007bff; }
 
-  .correct-anim { animation: bounce 0.5s; }
-  @keyframes bounce {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.25); }
-    100% { transform: scale(1); }
-  }
+    button:disabled { background: #ccc; }
 
-  .wrong-anim { animation: shake 0.4s; }
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    50% { transform: translateX(6px); }
-    75% { transform: translateX(-6px); }
-    100% { transform: translateX(0); }
-  }
+    input {
+      font-size: 22px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+      width: 85%;
+    }
 
-  .progress {
-    font-size: 24px;
-    margin-bottom: 8px;
-  }
+    #result {
+      font-size: 32px;
+      margin-top: 6px;
+      min-height: 40px;
+    }
 
-  #result {
-    font-size: 40px;
-    min-height: 42px;
-    margin: 10px;
-    font-weight: 700;
-  }
+    .progress { font-size: 20px; margin-bottom: 10px; color: #555; }
 
-  footer {
-    margin-top: auto;
-    padding: 12px;
-    font-size: 16px;
-    color: #555;
-  }
-</style>
+    .leader { font-size: 22px; margin: 6px; }
+
+    .confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      animation: confetti-fall 1s ease-out forwards;
+      font-size: 38px;
+    }
+
+    @keyframes confetti-fall {
+      from { transform: translateY(-120px); opacity: 1; }
+      to { transform: translateY(300px); opacity: 0; }
+    }
+
+    .teacher {
+      font-size: 60px;
+      margin-bottom: 6px;
+      animation: bounce 1.5s infinite alternate;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 8px;
+      font-size: 16px;
+      color: #666;
+      opacity: 0.95;
+    }
+  </style>
 </head>
 
 <body>
@@ -129,8 +150,10 @@
 
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
-  <input id="nameInput" placeholder="Type your name">
-  <button onclick="startGame()" class="start-btn">Start</button>
+  <p>Type your name</p>
+  <input id="nameInput" />
+  <br><br>
+  <button onclick="startGame()" class="submit-btn">Start</button>
 </div>
 
 <!-- GAME SCREEN -->
@@ -143,43 +166,56 @@
 
 <!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
-  <div style="font-size:70px;">👩‍🏫</div>
-  <h2 id="endCelebration" style="font-size:32px;"></h2>
-  <p id="finalScore" style="font-size:26px;"></p>
+  <div class="teacher">👩‍🏫</div>
+  <h2 id="endCelebration">🎉 Perfect Exercise!</h2>
+  <p id="finalScore"></p>
 
-  <h3>🏆</h3>
-  <div id="leaderboard"></div>
+  <h3>🏆 Leaderboard</h3>
+  <div id="leaderboard">Loading...</div>
 
-  <button onclick="shareResult()" class="whatsapp-btn">
-    <span class="whatsapp-icon">🟩</span> Share
-  </button>
-
-  <button onclick="location.reload()" class="replay-btn">Replay</button>
+  <br>
+  <button onclick="shareResult()" class="whatsapp-btn">🟢 WhatsApp</button>
+  <button onclick="location.reload()" class="replay-btn">🔄 Replay</button>
 </div>
 
 <footer>An MPPS Pedduru Initiative</footer>
 
 <script>
-  let name="",score=0,streak=0,questionCount=0,correct;
-  const TOTAL=15;
-  let answered=false;
-  const fruits=["🍎","🍌","🍇","🍓"];
+  let name = "";
+  let score = 0;
+  let streak = 0;
+  let questionCount = 0;
+  let correct;
+  const TOTAL = 15;
+  let answered = false;
+  const fruits = ["🍎","🍌","🍇","🍓"];
 
-  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+
   function sound(f,d){
     const o=ctx.createOscillator();
     const g=ctx.createGain();
     o.frequency.value=f;
-    o.connect(g);g.connect(ctx.destination);
+    o.connect(g); 
+    g.connect(ctx.destination);
     o.start();
     g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+d);
     o.stop(ctx.currentTime+d);
+  }
+
+  function confettiBurst(symbol){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.textContent=symbol;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),900);
   }
 
   function startGame(){
     name=document.getElementById("nameInput").value||"Friend";
     document.getElementById("nameScreen").style.display="none";
     document.getElementById("gameScreen").style.display="block";
+    sound(600,0.2);
     nextQ();
   }
 
@@ -198,43 +234,49 @@
     const f1=fruits[Math.floor(Math.random()*fruits.length)];
     const f2=fruits[Math.floor(Math.random()*fruits.length)];
 
-    document.getElementById("question").innerHTML =
+    document.getElementById("question").innerHTML=
       `<div class="fruits">${f1.repeat(a)}</div><br>
-       <div style="font-size:42px;">+</div><br>
+       <div style="font-size:36px;">+</div><br>
        <div class="fruits">${f2.repeat(b)}</div>`;
 
     const ops=[correct,correct+1,correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
+
     const optDiv=document.getElementById("options");
     optDiv.innerHTML="";
+
     ops.forEach(v=>{
       const btn=document.createElement("button");
-      btn.textContent=v;
-      btn.style.background="#00C853";
+      btn.className = "answer-btn";
+      btn.innerText=v;
       btn.onclick=()=>check(v);
       optDiv.appendChild(btn);
     });
   }
 
   function check(v){
-    if(answered)return;
+    if(answered) return;
     answered=true;
 
     document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 
     if(v===correct){
-      score++; streak++;
-      document.getElementById("result").textContent="Good job!";
+      score++;
+      streak++;
+      let phrases=["Good job!","Great!","Nice!","Super!"];
+      let msg=phrases[Math.floor(Math.random()*phrases.length)];
+      document.getElementById("result").innerHTML=msg;
+
       document.getElementById("question").classList.add("correct-anim");
-      sound(800,0.25);
+      sound(800,0.3);
 
-      if(streak===5){ document.getElementById("result").textContent="5 in a row! ⭐"; }
-      if(streak===10){ document.getElementById("result").textContent="10 in a row! 🌟"; }
-
-    } else {
+      if(streak===5){ confettiBurst("⭐"); document.getElementById("result").innerHTML="5 in a row! ⭐"; }
+      if(streak===10){ confettiBurst("🌟"); document.getElementById("result").innerHTML="10 in a row! 🌟"; }
+    }
+    else {
       streak=0;
-      document.getElementById("result").textContent="Try next time!";
+      document.getElementById("result").innerHTML="Try again next time!";
       document.getElementById("question").classList.add("wrong-anim");
-      sound(200,0.25);
+      sound(200,0.3);
     }
 
     setTimeout(()=>{
@@ -243,34 +285,59 @@
     },1200);
   }
 
+  function sendToGoogle(){
+    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSe5T6E5S06KfcE0ebGutxyLGAYqzGMVS4lq8cZsUUS9JXtL7g/formResponse";
+    const data=`entry.614166214=${encodeURIComponent(name)}&entry.1440673296=${encodeURIComponent(score)}`;
+
+    fetch(formURL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:data
+    });
+  }
+
+  async function fetchCentralLeaderboard(){
+    const csvUrl="https://docs.google.com/spreadsheets/d/2PACX-1vSSl1CFOjQQvN_Q1gHbXw4RSbyt81wOZpxTRvKjyGSumhSPwCCXmorBg8Q_6-HBHKrFAyKpMPH99N1_/gviz/tq?tqx=out:csv";
+
+    try {
+      const response = await fetch(csvUrl);
+      const csvText = await response.text();
+
+      const parsed = Papa.parse(csvText, { header: true });
+      const data = parsed.data;
+
+      const rows = data
+        .filter(r => r.Name && r.Score)
+        .sort((a,b)=>parseInt(b.Score)-parseInt(a.Score));
+
+      let html="";
+      rows.slice(0,10).forEach((r,i)=>{
+        html+=`<div class="leader">${i+1}. ${r.Name} — ${r.Score}</div>`;
+      });
+
+      document.getElementById("leaderboard").innerHTML=html;
+
+    } catch(e){
+      document.getElementById("leaderboard").innerHTML="Leaderboard unavailable";
+    }
+  }
+
   function endGame(){
     document.getElementById("gameScreen").style.display="none";
     document.getElementById("endScreen").style.display="block";
 
-    if(score===15) document.getElementById("endCelebration").textContent="Perfect! 🎉";
-    else document.getElementById("endCelebration").textContent="Good!";
+    if(score===15){
+      confettiBurst("🎉");
+      document.getElementById("endCelebration").innerHTML="Perfect Exercise! 🎉";
+    } else {
+      document.getElementById("endCelebration").innerHTML="Congratulations!";
+    }
 
-    document.getElementById("finalScore").textContent = `Hey ${name}, you scored ${score}/15`;
+    document.getElementById("finalScore").innerHTML=`Hey ${name}, you scored ${score}/15. Way to go!`;
 
-    saveBoard();
-    showBoard();
-  }
-
-  function saveBoard(){
-    let board=JSON.parse(localStorage.getItem("board"))||[];
-    board.push({name,score});
-    board.sort((a,b)=>b.score-a.score);
-    board=board.slice(0,5);
-    localStorage.setItem("board",JSON.stringify(board));
-  }
-
-  function showBoard(){
-    let board=JSON.parse(localStorage.getItem("board"))||[];
-    let h="";
-    board.forEach((e,i)=>{
-      h+=`<div class="leader">${i+1}. ${e.name} — ${e.score}</div>`;
-    });
-    document.getElementById("leaderboard").innerHTML=h;
+    sendToGoogle();
+    setTimeout(fetchCentralLeaderboard, 1000);
   }
 
   function shareResult(){
@@ -285,5 +352,6 @@
     });
   }
 </script>
+
 </body>
 </html>
