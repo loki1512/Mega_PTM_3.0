@@ -1,136 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add & Pop! Homework</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add & Pop! Homework</title>
 
-  <!-- Screenshot -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <!-- CSV Parser -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-  <style>
-    body {
-      font-family: "Comic Sans MS", cursive;
-      background: linear-gradient(135deg, #fdeff9, #ecf0ff);
-      text-align: center;
-      padding: 12px;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      color: #333;
-    }
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* NO SCROLL */
+    height: 100%;
+  }
+  body {
+    font-family: "Comic Neue", sans-serif;
+    background: linear-gradient(135deg, #fdeff9, #ecf0ff);
+    text-align: center;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+  }
 
-    h1 { font-size: 34px; margin-bottom: 6px; }
+  h1 {
+    font-size: 36px;
+    margin: 8px 0;
+  }
 
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 16px;
-      margin: 12px auto;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      max-width: 380px;
-    }
+  .card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    margin: auto;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    max-width: 380px;
+  }
 
-    .fruits {
-      font-size: 48px;
-      display: inline-block;
-      animation: drop 0.5s ease-out;
-    }
+  .fruits {
+    font-size: 50px;
+    display: inline-block;
+    animation: drop 0.5s ease-out;
+  }
+  @keyframes drop {
+    from { transform: translateY(-40px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
 
-    @keyframes drop {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
+  .correct-anim { animation: bounce 0.6s ease; }
+  @keyframes bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
 
-    .correct-anim { animation: bounce 0.6s ease; }
-    @keyframes bounce {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.3); }
-      100% { transform: scale(1); }
-    }
+  .wrong-anim { animation: shake 0.4s ease; }
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-6px); }
+    100% { transform: translateX(0); }
+  }
 
-    .wrong-anim { animation: shake 0.4s ease; }
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      50% { transform: translateX(6px); }
-      75% { transform: translateX(-6px); }
-      100% { transform: translateX(0); }
-    }
+  button {
+    font-size: 24px;
+    padding: 12px 22px;
+    border-radius: 14px;
+    border: none;
+    margin: 10px; /* ADDED GAP */
+    color: white;
+  }
+  .whatsapp-btn { background: #25D366; }
+  .replay-btn { background: #ffb300; }
 
-    button {
-      border: none;
-      cursor: pointer;
-    }
+  .progress {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
 
-    .answer-btn {
-      font-size: 32px;
-      padding: 12px 24px;
-      margin: 8px;
-      border-radius: 16px;
-      border: 3px solid #555;
-      background: white;
-      color: #222;
-      min-width: 80px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
+  #result {
+    font-size: 36px;
+    margin-top: 10px;
+    min-height: 36px;
+  }
 
-    .answer-btn:disabled { opacity: 0.4; }
+  .leader {
+    font-size: 22px;
+    margin: 6px;
+  }
 
-    .answer-btn:active { transform: scale(0.94); }
-
-    .whatsapp-btn { background: #25D366; color:white; font-size: 26px; padding:14px 22px; border-radius:14px; }
-    .replay-btn { background: #ffb300; color:white; font-size:26px; padding:14px 22px; border-radius:14px; }
-    .submit-btn { background: #007bff; color:white; font-size:26px; padding:14px 22px; border-radius:14px; }
-
-    input {
-      font-size: 22px;
-      padding: 10px;
-      border-radius: 12px;
-      border: 2px solid #aaa;
-      text-align: center;
-      width: 85%;
-    }
-
-    #result {
-      font-size: 32px;
-      margin-top: 6px;
-      min-height: 40px;
-    }
-
-    .progress { font-size: 20px; margin-bottom: 10px; color: #555; }
-
-    .leader { font-size: 22px; margin: 6px; }
-
-    .teacher {
-      font-size: 60px;
-      margin-bottom: 6px;
-      animation: bounce 1.5s infinite alternate;
-    }
-
-    .confetti {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      animation: confetti-fall 1s ease-out forwards;
-      font-size: 38px;
-    }
-    @keyframes confetti-fall {
-      from { transform: translateY(-120px); opacity: 1; }
-      to { transform: translateY(300px); opacity: 0; }
-    }
-
-    footer {
-      margin-top: auto;
-      padding: 8px;
-      font-size: 16px;
-      color: #666;
-      opacity: 0.95;
-    }
-  </style>
+  footer {
+    font-size: 16px;
+    color: #555;
+    margin-top: 6px;
+    padding-bottom: 6px;
+  }
+</style>
 </head>
 
 <body>
@@ -138,10 +104,9 @@
 <h1>🍎 Add & Pop 🍌</h1>
 
 <div id="nameScreen" class="card">
-  <p>Type your name</p>
-  <input id="nameInput" />
+  <input id="nameInput" placeholder="Type your name" style="font-size:24px;" />
   <br><br>
-  <button onclick="startGame()" class="submit-btn">Start</button>
+  <button onclick="startGame()">▶ Start</button>
 </div>
 
 <div id="gameScreen" class="card" style="display:none;">
@@ -152,14 +117,13 @@
 </div>
 
 <div id="endScreen" class="card" style="display:none;">
-  <div class="teacher">👩‍🏫</div>
-  <h2 id="endCelebration"></h2>
-  <p id="finalScore"></p>
+  <div style="font-size:60px;">👩‍🏫</div>
+  <h2 id="endCelebration">🎉</h2>
+  <p id="finalScore" style="font-size:26px;"></p>
 
-  <h3>🏆 Leaderboard</h3>
-  <div id="leaderboard">Loading...</div>
+  <h3>🏆</h3>
+  <div id="leaderboard"></div>
 
-  <br>
   <button onclick="shareResult()" class="whatsapp-btn">🟢 WhatsApp</button>
   <button onclick="location.reload()" class="replay-btn">🔄 Replay</button>
 </div>
@@ -167,34 +131,20 @@
 <footer>An MPPS Pedduru Initiative</footer>
 
 <script>
-  let name = "";
-  let score = 0;
-  let streak = 0;
-  let questionCount = 0;
-  let correct;
-  const TOTAL = 15;
-  let answered = false;
-  const fruits = ["🍎","🍌","🍇","🍓"];
+  let name="",score=0,streak=0,questionCount=0,correct;
+  const TOTAL=15;
+  let answered=false;
+  const fruits=["🍎","🍌","🍇","🍓"];
 
   const ctx = new (window.AudioContext||window.webkitAudioContext)();
-
   function sound(f,d){
     const o=ctx.createOscillator();
     const g=ctx.createGain();
     o.frequency.value=f;
-    o.connect(g); 
-    g.connect(ctx.destination);
+    o.connect(g);g.connect(ctx.destination);
     o.start();
     g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+d);
     o.stop(ctx.currentTime+d);
-  }
-
-  function confettiBurst(symbol){
-    const c=document.createElement("div");
-    c.className="confetti";
-    c.textContent=symbol;
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),900);
   }
 
   function startGame(){
@@ -207,7 +157,6 @@
   function nextQ(){
     answered=false;
     if(questionCount===TOTAL){ endGame(); return; }
-
     questionCount++;
     document.getElementById("qno").innerHTML=questionCount;
     document.getElementById("result").innerHTML="";
@@ -219,117 +168,64 @@
     const f1=fruits[Math.floor(Math.random()*fruits.length)];
     const f2=fruits[Math.floor(Math.random()*fruits.length)];
 
-    document.getElementById("question").innerHTML=
+    document.getElementById("question").innerHTML =
       `<div class="fruits">${f1.repeat(a)}</div><br>
-       <div style="font-size:36px;">+</div><br>
+       <div style="font-size:38px;">+</div><br>
        <div class="fruits">${f2.repeat(b)}</div>`;
 
     const ops=[correct,correct+1,correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
-
-    const optionsDiv=document.getElementById("options");
-    optionsDiv.innerHTML="";
-
-    ops.forEach(num=>{
+    const optDiv=document.getElementById("options");
+    optDiv.innerHTML="";
+    ops.forEach(v=>{
       const btn=document.createElement("button");
-      btn.innerText=num;
-      btn.className="answer-btn";
-      btn.onclick=()=>check(num);
-      optionsDiv.appendChild(btn);
+      btn.textContent=v;
+      btn.onclick=()=>check(v);
+      optDiv.appendChild(btn);
     });
   }
 
-  function check(val){
-    if(answered) return;
+  function check(v){
+    if(answered)return;
     answered=true;
+    document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 
-    document.querySelectorAll(".answer-btn").forEach(b=>b.disabled=true);
-
-    if(val===correct){
-      score++;
-      streak++;
-      let msg=["Good job!","Great!","Super!","Nice!"][Math.floor(Math.random()*4)];
-      document.getElementById("result").innerHTML=msg;
+    if(v===correct){
+      score++; streak++;
+      const praise=["Good job!","Super!","Nice!","Great!"];
+      document.getElementById("result").textContent=praise[Math.floor(Math.random()*praise.length)];
+      document.getElementById("question").classList.add("correct-anim");
       sound(800,0.3);
-
-      if(streak===5) { document.getElementById("result").innerHTML="5 in a row! ⭐"; confettiBurst("⭐"); }
-      if(streak===10){ document.getElementById("result").innerHTML="10 in a row! 🌟"; confettiBurst("🌟"); }
-    }
-    else {
+    } else {
       streak=0;
-      document.getElementById("result").innerHTML="Try again next time!";
+      document.getElementById("result").textContent="Try next time!";
+      document.getElementById("question").classList.add("wrong-anim");
       sound(200,0.3);
     }
 
-    setTimeout(nextQ,1200);
-  }
-
-  function sendToGoogle(){
-    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSfd0N5AF5ifJ6nt3r3PypAGzB8W35Vq2aaEl2liRuvotIiIug/formResponse";
-    const data =
-      `entry.645887948=${encodeURIComponent(name)}&entry.792395446=${encodeURIComponent(score)}`;
-
-    fetch(formURL,{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"application/x-www-form-urlencoded"},
-      body:data
-    });
-  }
-
-  async function fetchCentralLeaderboard(){
-    const csvURL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5g7-A90Fi5k_e8q_nEvUc-wuBdcVH7lu0MDEfWF9YCFajt8i-OEGJSgvE3sVkKQlQ13qHw0M_m2vc/pub?output=csv";
-
-    try {
-      const res = await fetch(csvURL);
-      const text = await res.text();
-      const parsed = Papa.parse(text, { header: true });
-      const rows = parsed.data
-        .filter(r => r.Name && r.Score)
-        .sort((a,b)=>parseInt(b.Score)-parseInt(a.Score));
-
-      let html="";
-      rows.slice(0,10).forEach((r,i)=>{
-        html+=`<div class="leader">${i+1}. ${r.Name} — ${r.Score}</div>`;
-      });
-
-      document.getElementById("leaderboard").innerHTML=html;
-    }
-    catch(e){
-      document.getElementById("leaderboard").innerHTML="Leaderboard unavailable";
-    }
+    setTimeout(()=>{
+      document.getElementById("question").classList.remove("correct-anim","wrong-anim");
+      nextQ();
+    },1200);
   }
 
   function endGame(){
     document.getElementById("gameScreen").style.display="none";
     document.getElementById("endScreen").style.display="block";
-
-    if(score===15){
-      document.getElementById("endCelebration").innerHTML="🎉 Perfect Exercise!";
-      confettiBurst("🎉");
-    } else {
-      document.getElementById("endCelebration").innerHTML="Congratulations!";
-    }
-
-    document.getElementById("finalScore").innerHTML =
-      `Hey ${name}, you scored ${score}/15. Way to go!`;
-
-    sendToGoogle();
-    setTimeout(fetchCentralLeaderboard,1000);
+    document.getElementById("endCelebration").textContent = score===15 ? "Perfect!" : "Good!";
+    document.getElementById("finalScore").textContent=`Congratulations! Hey ${name}, you scored ${score}/15`;
   }
 
   function shareResult(){
-    const node=document.getElementById("endScreen");
-    html2canvas(node).then(canvas=>{
-      canvas.toBlob(blob=>{
-        const file=new File([blob],"homework.png",{type:"image/png"});
-        if(navigator.canShare && navigator.canShare({files:[file]})){
-          navigator.share({files:[file]});
+    const t=document.getElementById("endScreen");
+    html2canvas(t).then(c=>{
+      c.toBlob(b=>{
+        const f=new File([b],"homework.png",{type:"image/png"});
+        if(navigator.canShare && navigator.canShare({files:[f]})){
+          navigator.share({files:[f]});
         }
       });
     });
   }
 </script>
-
 </body>
 </html>
