@@ -27,9 +27,37 @@
       max-width: 360px;
     }
 
-    .box {
-      font-size: 40px;
-      margin: 12px 0;
+    .fruits {
+      font-size: 45px;
+      display: inline-block;
+      animation: drop 0.5s ease-out;
+    }
+
+    @keyframes drop {
+      from { transform: translateY(-30px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .correct-anim {
+      animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(1);}
+      30% { transform: scale(1.3);}
+      100% { transform: scale(1);}
+    }
+
+    .wrong-anim {
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
     }
 
     button {
@@ -55,8 +83,8 @@
     }
 
     #result {
-      font-size: 24px;
-      margin-top: 10px;
+      font-size: 26px;
+      margin-top: 12px;
       min-height: 30px;
     }
 
@@ -68,175 +96,173 @@
 
 <body>
 
-<h1>🍎 Add & Pop 🍎</h1>
+<h1>🍎 Add & Pop 🍌</h1>
 
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
-  <p>👋 Student Name</p>
-  <input id="nameInput" placeholder="Type your name" />
+  <p>👋</p>
+  <input id="nameInput" placeholder="Name" />
   <br><br>
-  <button onclick="startGame()">▶ Start Homework</button>
+  <button onclick="startGame()">▶</button>
 </div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen" class="card" style="display:none;">
   <h2 id="welcome"></h2>
   <div class="progress">
-    Question <span id="qno"></span> / 15
+    <span id="qno"></span> / 15
   </div>
 
-  <div id="question" class="box"></div>
+  <div id="question"></div>
   <div id="options"></div>
   <div id="result"></div>
 </div>
 
 <!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
-  <h2>🎉 Homework Completed!</h2>
+  <h2>🎉</h2>
   <p id="finalScore"></p>
 
-  <h3>🏆 Leaderboard</h3>
+  <h3>🏆</h3>
   <div id="leaderboard"></div>
 
   <br>
-  <button onclick="shareResult()">📤 Send Homework on WhatsApp</button>
-  <button onclick="location.reload()">🔄 Play Again</button>
+  <button onclick="shareResult()">📤</button>
+  <button onclick="location.reload()">🔄</button>
 </div>
 
 <script>
   let name = "";
-  let a, b, correct;
   let score = 0;
   let questionCount = 0;
+  let correct;
   const TOTAL = 15;
   let answered = false;
 
-  /* 🔊 SOUND EFFECTS */
+  const fruits = ["🍎","🍌","🍇","🍓"];
+
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  function playSound(freq, duration) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = freq;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-    osc.stop(ctx.currentTime + duration);
+  function sound(f,d){
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.frequency.value = f;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
+    o.stop(ctx.currentTime + d);
   }
 
-  function startGame() {
-    name = document.getElementById("nameInput").value || "Student";
+  function startGame(){
+    name = document.getElementById("nameInput").value || "Friend";
     document.getElementById("nameScreen").style.display = "none";
     document.getElementById("gameScreen").style.display = "block";
-    document.getElementById("welcome").innerText = "😊 All the best, " + name + "!";
-    playSound(600, 0.2);
-    nextQuestion();
+    document.getElementById("welcome").innerHTML = name;
+    sound(600,0.2);
+    nextQ();
   }
 
-  function nextQuestion() {
+  function nextQ(){
     answered = false;
-    if (questionCount === TOTAL) {
+
+    if (questionCount === TOTAL){
       endGame();
       return;
     }
 
     questionCount++;
-    document.getElementById("qno").innerText = questionCount;
+    document.getElementById("qno").innerHTML = questionCount;
     document.getElementById("result").innerHTML = "";
 
-    a = Math.floor(Math.random() * 5) + 1;
-    b = Math.floor(Math.random() * 5) + 1;
+    const a = Math.floor(Math.random()*5)+1;
+    const b = Math.floor(Math.random()*5)+1;
+
     correct = a + b;
 
-    document.getElementById("question").innerHTML =
-      "🍎 ".repeat(a) + "<br> + <br>" + "🍎 ".repeat(b);
+    const fruit1 = fruits[Math.floor(Math.random()*fruits.length)];
+    const fruit2 = fruits[Math.floor(Math.random()*fruits.length)];
 
-    let options = [correct, correct + 1, correct - 1]
-      .filter(n => n > 0)
-      .sort(() => Math.random() - 0.5);
+    let html = "";
+    html += `<div class="fruits">${fruit1.repeat(a)}</div><br>`;
+    html += `<div style="font-size:30px;">+</div><br>`;
+    html += `<div class="fruits">${fruit2.repeat(b)}</div>`;
+
+    document.getElementById("question").innerHTML = html;
+
+    const ops=[correct, correct+1, correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
 
     const optDiv = document.getElementById("options");
     optDiv.innerHTML = "";
 
-    options.forEach(num => {
+    ops.forEach(v=>{
       const btn = document.createElement("button");
-      btn.innerText = num;
-      btn.onclick = () => checkAnswer(num);
+      btn.innerText = v;
+      btn.onclick = ()=>check(v);
       optDiv.appendChild(btn);
     });
   }
 
-  function checkAnswer(ans) {
-    if (answered) return;
+  function check(v){
+    if(answered) return;
     answered = true;
 
-    document.querySelectorAll("#options button")
-      .forEach(b => b.disabled = true);
+    document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 
-    if (ans === correct) {
+    if(v === correct){
       score++;
-      document.getElementById("result").innerHTML = "✅ Correct!";
-      playSound(800, 0.3);
+      document.getElementById("result").innerHTML = "✨";
+      document.getElementById("question").classList.add("correct-anim");
+      sound(800,0.3);
     } else {
-      document.getElementById("result").innerHTML =
-        `❌ Wrong! Correct answer is ${correct}`;
-      playSound(200, 0.3);
+      document.getElementById("result").innerHTML = "❌";
+      document.getElementById("question").classList.add("wrong-anim");
+      sound(200,0.3);
     }
 
-    setTimeout(nextQuestion, 1500);
+    setTimeout(()=>{
+      document.getElementById("question").classList.remove("correct-anim","wrong-anim");
+      nextQ();
+    },1300);
   }
 
-  function endGame() {
+  function endGame(){
     document.getElementById("gameScreen").style.display = "none";
     document.getElementById("endScreen").style.display = "block";
-
-    document.getElementById("finalScore").innerHTML =
-      `👏 ${name}, you scored <b>${score} / 15</b>`;
-
-    saveScore();
-    showLeaderboard();
+    document.getElementById("finalScore").innerHTML = `${score} / 15`;
+    saveBoard();
+    showBoard();
   }
 
-  function saveScore() {
-    let board = JSON.parse(localStorage.getItem("leaderboard")) || [];
-    board.push({ name, score });
-    board.sort((a, b) => b.score - a.score);
-    board = board.slice(0, 5);
-    localStorage.setItem("leaderboard", JSON.stringify(board));
+  function saveBoard(){
+    let board = JSON.parse(localStorage.getItem("board"))||[];
+    board.push({name,score});
+    board.sort((a,b)=>b.score-a.score);
+    board = board.slice(0,5);
+    localStorage.setItem("board",JSON.stringify(board));
   }
 
-  function showLeaderboard() {
-    let board = JSON.parse(localStorage.getItem("leaderboard")) || [];
-    let html = "";
-    board.forEach((e, i) => {
-      html += `<div class="leader">${i + 1}. ${e.name} — ${e.score}</div>`;
+  function showBoard(){
+    let board = JSON.parse(localStorage.getItem("board"))||[];
+    let h="";
+    board.forEach((e,i)=>{
+      h+=`<div class="leader">${i+1}. ${e.name} — ${e.score}</div>`;
     });
-    document.getElementById("leaderboard").innerHTML = html;
+    document.getElementById("leaderboard").innerHTML=h;
   }
 
-  /* 📤 WHATSAPP SHARE */
-  function shareResult() {
-    const target = document.getElementById("endScreen");
+  function shareResult(){
+    const t = document.getElementById("endScreen");
 
-    html2canvas(target).then(canvas => {
-      canvas.toBlob(blob => {
-        const file = new File([blob], "homework-result.png", {
-          type: "image/png"
-        });
+    html2canvas(t).then(c=>{
+      c.toBlob(b=>{
+        const f = new File([b],"homework.png",{type:"image/png"});
 
-        const text =
-          "📚 Homework Completed\n" +
-          "Name: " + name + "\n" +
-          "Score: " + score + " / 15\n" +
-          "School: MPPS PEDDURU";
+        const text = name + " " + score + "/15";
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            files: [file],
-            text: text
-          });
+        if(navigator.canShare && navigator.canShare({files:[f]})){
+          navigator.share({files:[f],text});
         } else {
-          alert("Please take screenshot and share manually.");
+          alert("Screenshot manually.");
         }
       });
     });
