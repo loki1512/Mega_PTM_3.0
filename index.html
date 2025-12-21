@@ -4,7 +4,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add & Pop! Homework</title>
 
-  <!-- Screenshot Library -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
@@ -16,26 +15,29 @@
       color: #333;
     }
 
-    h1 { font-size: 30px; margin-bottom: 6px; }
+    h1 {
+      font-size: 34px;
+      margin-bottom: 6px;
+    }
 
     .card {
       background: white;
       border-radius: 18px;
       padding: 16px;
       margin: 12px auto;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-      max-width: 360px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      max-width: 380px;
     }
 
     .fruits {
-      font-size: 45px;
+      font-size: 48px;
       display: inline-block;
       animation: drop 0.5s ease-out;
     }
 
     @keyframes drop {
-      from { transform: translateY(-30px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .correct-anim {
@@ -43,9 +45,9 @@
     }
 
     @keyframes bounce {
-      0% { transform: scale(1);}
-      30% { transform: scale(1.3);}
-      100% { transform: scale(1);}
+      0% { transform: scale(1); }
+      30% { transform: scale(1.3); }
+      100% { transform: scale(1); }
     }
 
     .wrong-anim {
@@ -61,20 +63,30 @@
     }
 
     button {
-      font-size: 22px;
-      padding: 12px 18px;
+      font-size: 24px;
+      padding: 12px 20px;
       margin: 6px;
       border-radius: 14px;
       border: none;
       background: #6c8cff;
       color: white;
-      min-width: 90px;
     }
 
-    button:disabled { background: #ccc; }
+    button:disabled {
+      background: #ccc;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      font-size: 26px;
+    }
+
+    .replay-btn {
+      background: #ffb300;
+    }
 
     input {
-      font-size: 20px;
+      font-size: 22px;
       padding: 10px;
       border-radius: 12px;
       border: 1px solid #ddd;
@@ -83,14 +95,42 @@
     }
 
     #result {
-      font-size: 26px;
+      font-size: 40px;
       margin-top: 12px;
-      min-height: 30px;
+      min-height: 40px;
     }
 
-    .progress { font-size: 18px; color: #555; }
+    .progress {
+      font-size: 20px;
+      color: #555;
+      margin-bottom: 10px;
+    }
 
-    .leader { font-size: 20px; margin: 6px; }
+    .leader {
+      font-size: 22px;
+      margin: 6px;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      animation: confetti-fall 1s ease-out forwards;
+      font-size: 38px;
+    }
+
+    @keyframes confetti-fall {
+      from { transform: translateY(-100px); opacity: 1; }
+      to { transform: translateY(300px); opacity: 0; }
+    }
+
+    .teacher {
+      font-size: 60px;
+      animation: bounce 1s infinite alternate;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 
@@ -108,10 +148,7 @@
 
 <!-- GAME SCREEN -->
 <div id="gameScreen" class="card" style="display:none;">
-  <h2 id="welcome"></h2>
-  <div class="progress">
-    <span id="qno"></span> / 15
-  </div>
+  <div class="progress"><span id="qno"></span> / 15</div>
 
   <div id="question"></div>
   <div id="options"></div>
@@ -120,25 +157,26 @@
 
 <!-- END SCREEN -->
 <div id="endScreen" class="card" style="display:none;">
-  <h2>🎉</h2>
+  <div class="teacher">👩‍🏫</div>
+  <h2 id="endCelebration">🎉</h2>
   <p id="finalScore"></p>
 
   <h3>🏆</h3>
   <div id="leaderboard"></div>
 
   <br>
-  <button onclick="shareResult()">📤</button>
-  <button onclick="location.reload()">🔄</button>
+  <button onclick="shareResult()" class="whatsapp-btn">🟢 WhatsApp</button>
+  <button onclick="location.reload()" class="replay-btn">🔄 Replay</button>
 </div>
 
 <script>
   let name = "";
   let score = 0;
+  let streak = 0;
   let questionCount = 0;
   let correct;
   const TOTAL = 15;
   let answered = false;
-
   const fruits = ["🍎","🍌","🍇","🍓"];
 
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -146,18 +184,24 @@
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.frequency.value = f;
-    o.connect(g);
-    g.connect(ctx.destination);
+    o.connect(g); g.connect(ctx.destination);
     o.start();
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
     o.stop(ctx.currentTime + d);
   }
 
+  function confettiBurst(symbol){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.textContent = symbol;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),900);
+  }
+
   function startGame(){
     name = document.getElementById("nameInput").value || "Friend";
-    document.getElementById("nameScreen").style.display = "none";
-    document.getElementById("gameScreen").style.display = "block";
-    document.getElementById("welcome").innerHTML = name;
+    document.getElementById("nameScreen").style.display="none";
+    document.getElementById("gameScreen").style.display="block";
     sound(600,0.2);
     nextQ();
   }
@@ -165,7 +209,7 @@
   function nextQ(){
     answered = false;
 
-    if (questionCount === TOTAL){
+    if(questionCount === TOTAL){
       endGame();
       return;
     }
@@ -176,28 +220,26 @@
 
     const a = Math.floor(Math.random()*5)+1;
     const b = Math.floor(Math.random()*5)+1;
-
     correct = a + b;
 
-    const fruit1 = fruits[Math.floor(Math.random()*fruits.length)];
-    const fruit2 = fruits[Math.floor(Math.random()*fruits.length)];
+    const f1 = fruits[Math.floor(Math.random()*fruits.length)];
+    const f2 = fruits[Math.floor(Math.random()*fruits.length)];
 
-    let html = "";
-    html += `<div class="fruits">${fruit1.repeat(a)}</div><br>`;
-    html += `<div style="font-size:30px;">+</div><br>`;
-    html += `<div class="fruits">${fruit2.repeat(b)}</div>`;
+    let html="";
+    html += `<div class="fruits">${f1.repeat(a)}</div><br>`;
+    html += `<div style="font-size:36px;">+</div><br>`;
+    html += `<div class="fruits">${f2.repeat(b)}</div>`;
 
     document.getElementById("question").innerHTML = html;
 
     const ops=[correct, correct+1, correct-1].filter(n=>n>0).sort(()=>Math.random()-0.5);
-
     const optDiv = document.getElementById("options");
-    optDiv.innerHTML = "";
+    optDiv.innerHTML="";
 
     ops.forEach(v=>{
       const btn = document.createElement("button");
-      btn.innerText = v;
-      btn.onclick = ()=>check(v);
+      btn.innerText=v;
+      btn.onclick=()=>check(v);
       optDiv.appendChild(btn);
     });
   }
@@ -208,27 +250,43 @@
 
     document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 
-    if(v === correct){
+    if(v===correct){
       score++;
-      document.getElementById("result").innerHTML = "✨";
+      streak++;
+      document.getElementById("result").innerHTML="✨";
       document.getElementById("question").classList.add("correct-anim");
       sound(800,0.3);
-    } else {
-      document.getElementById("result").innerHTML = "❌";
+
+      if(streak===5) confettiBurst("⭐");
+      if(streak===10) confettiBurst("🌟");
+    }
+    else {
+      streak=0;
+      document.getElementById("result").innerHTML="❌";
       document.getElementById("question").classList.add("wrong-anim");
       sound(200,0.3);
+      confettiBurst("💦");
     }
 
     setTimeout(()=>{
       document.getElementById("question").classList.remove("correct-anim","wrong-anim");
       nextQ();
-    },1300);
+    },1200);
   }
 
   function endGame(){
-    document.getElementById("gameScreen").style.display = "none";
-    document.getElementById("endScreen").style.display = "block";
+    document.getElementById("gameScreen").style.display="none";
+    document.getElementById("endScreen").style.display="block";
+
+    if(score===15){
+      confettiBurst("🎉");
+      document.getElementById("endCelebration").innerHTML="🎉";
+    } else {
+      document.getElementById("endCelebration").innerHTML="👏";
+    }
+
     document.getElementById("finalScore").innerHTML = `${score} / 15`;
+
     saveBoard();
     showBoard();
   }
@@ -251,18 +309,12 @@
   }
 
   function shareResult(){
-    const t = document.getElementById("endScreen");
-
+    const t=document.getElementById("endScreen");
     html2canvas(t).then(c=>{
       c.toBlob(b=>{
-        const f = new File([b],"homework.png",{type:"image/png"});
-
-        const text = name + " " + score + "/15";
-
+        const f=new File([b],"homework.png",{type:"image/png"});
         if(navigator.canShare && navigator.canShare({files:[f]})){
-          navigator.share({files:[f],text});
-        } else {
-          alert("Screenshot manually.");
+          navigator.share({files:[f]});
         }
       });
     });
