@@ -265,8 +265,8 @@
   }
 
   function sendToGoogle(){
-    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSe5T6E5S06KfcE0ebGutxyLGAYqzGMVS4lq8cZsUUS9JXtL7g/formResponse";
-    const data=`entry.614166214=${encodeURIComponent(name)}&entry.1440673296=${encodeURIComponent(score)}`;
+    const formURL="https://docs.google.com/forms/d/e/1FAIpQLSfd0N5AF5ifJ6nt3r3PypAGzB8W35Vq2aaEl2liRuvotIiIug/formResponse";
+    const data=`entry.645887948=${encodeURIComponent(name)}&entry.792395446=${encodeURIComponent(score)}`;
 
     fetch(formURL,{
       method:"POST",
@@ -277,7 +277,7 @@
   }
 
   async function fetchCentralLeaderboard(){
-    const csvUrl="https://docs.google.com/spreadsheets/d/2PACX-1vSSl1CFOjQQvN_Q1gHbXw4RSbyt81wOZpxTRvKjyGSumhSPwCCXmorBg8Q_6-HBHKrFAyKpMPH99N1_/gviz/tq?tqx=out:csv";
+    const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vR5g7-A90Fi5k_e8q_nEvUc-wuBdcVH7lu0MDEfWF9YCFajt8i-OEGJSgvE3sVkKQlQ13qHw0M_m2vc/pub?output=csv";
 
     try {
       const response = await fetch(csvUrl);
