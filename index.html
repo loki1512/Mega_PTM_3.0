@@ -22,8 +22,9 @@ body{
 }
 
 h1{margin:6px;font-size:30px;}
+
 button{
-  font-size:20px;
+  font-size:18px;
   padding:10px 14px;
   margin:5px;
   border:none;
@@ -31,22 +32,26 @@ button{
   background:#4a90e2;
   color:#fff;
 }
+
 button.secondary{background:#777;}
 button.nav{background:#ffb300;color:#000;}
-button.jump{font-size:16px;padding:6px 10px;margin:3px;}
+button.jump{font-size:15px;padding:6px 10px;margin:3px;}
 button.selected{background:#2ecc71;}
+
 .options button{width:90%;}
 
 .question{
-  font-size:24px;
+  font-size:22px;
   margin:12px 0;
 }
+
 .visual{
   font-size:44px;
   margin:8px;
 }
 
 #jumpNav{margin-top:10px;}
+
 .review-card{
   background:#fff;
   border-radius:12px;
@@ -56,6 +61,7 @@ button.selected{background:#2ecc71;}
   box-shadow:0 4px 10px rgba(0,0,0,.1);
   text-align:left;
 }
+
 footer{font-size:14px;color:#666;margin-top:10px;}
 </style>
 </head>
@@ -67,7 +73,8 @@ footer{font-size:14px;color:#666;margin-top:10px;}
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
   <p>Enter your name</p>
-  <input id="nameInput" style="font-size:20px;padding:8px;width:85%;text-align:center;border-radius:10px;">
+  <input id="nameInput"
+         style="font-size:18px;padding:8px;width:85%;text-align:center;border-radius:10px;">
   <br><br>
   <button onclick="startGame()">Start</button>
 </div>
@@ -108,117 +115,166 @@ footer{font-size:14px;color:#666;margin-top:10px;}
 <footer>An MPPS Pedduru Initiative</footer>
 
 <script>
-let name="";
-let current=0;
+/* ---------- UTILITIES ---------- */
+function rand(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+function shuffle(arr){
+  return arr.sort(()=>Math.random()-0.5);
+}
 
-const questions=[
- {q:"24 + 36 = ?",opts:[50,60,70],ans:60,vis:"➕"},
- {q:"56 − 19 = ?",opts:[37,39,41],ans:37,vis:"➖"},
- {q:"7 × 8 = ?",opts:[48,56,64],ans:56,vis:"✖️"},
- {q:"48 ÷ 6 = ?",opts:[6,8,10],ans:8,vis:"➗"},
+/* ---------- QUESTION GENERATORS ---------- */
+function genAddition(){
+  let a=rand(100,500), b=rand(10,200);
+  let ans=a+b;
+  return {q:`${a} + ${b} = ?`, ans,
+    opts:shuffle([ans,ans+10,ans-10]), vis:"➕"};
+}
 
- {q:"🍎🍎🍎 + 🍎🍎<br>How many apples?",opts:[4,5,6],ans:5,vis:"🍎"},
- {q:"12 candies shared by 3 children.<br>Each gets?",opts:[3,4,5],ans:4,vis:"🍬"},
- {q:"4 bicycles have how many wheels?",opts:[6,8,10],ans:8,vis:"🚲"},
- {q:"25 books, 9 borrowed.<br>Books left?",opts:[14,16,18],ans:16,vis:"📚"},
+function genSubtraction(){
+  let a=rand(300,700), b=rand(50,250);
+  let ans=a-b;
+  return {q:`${a} − ${b} = ?`, ans,
+    opts:shuffle([ans,ans+10,ans-10]), vis:"➖"};
+}
 
- {q:"345 + 120 = ?",opts:[455,465,475],ans:465,vis:"➕"},
- {q:"600 − 275 = ?",opts:[315,325,335],ans:325,vis:"➖"},
- {q:"9 × 6 = ?",opts:[45,54,63],ans:54,vis:"✖️"},
- {q:"81 ÷ 9 = ?",opts:[7,8,9],ans:9,vis:"➗"},
+function genMultiplication(){
+  let a=rand(4,9), b=rand(6,12);
+  let ans=a*b;
+  return {q:`${a} × ${b} = ?`, ans,
+    opts:shuffle([ans,ans+4,ans-4]), vis:"✖️"};
+}
 
- {q:"5 bags with 6 oranges each.<br>Total oranges?",opts:[25,30,35],ans:30,vis:"🍊"},
- {q:"₹100 − ₹37 = ?",opts:[53,63,73],ans:63,vis:"💰"},
- {q:"3 tables with 4 legs each.<br>Total legs?",opts:[10,12,14],ans:12,vis:"🪑"}
+function genDivision(){
+  let b=rand(3,9), ans=rand(4,12);
+  let a=b*ans;
+  return {q:`${a} ÷ ${b} = ?`, ans,
+    opts:shuffle([ans,ans+1,ans-1]), vis:"➗"};
+}
+
+function genApples(){
+  let a=rand(3,7), b=rand(2,6);
+  let ans=a+b;
+  return {q:`${a} apples + ${b} apples.<br>How many apples?`,
+    ans, opts:shuffle([ans,ans+1,ans-1]), vis:"🍎"};
+}
+
+function genCandies(){
+  let kids=[2,3,4][rand(0,2)];
+  let ans=rand(3,8);
+  let total=kids*ans;
+  return {q:`${total} candies shared by ${kids} children.<br>Each gets?`,
+    ans, opts:shuffle([ans,ans+1,ans-1]), vis:"🍬"};
+}
+
+function genBikes(){
+  let bikes=rand(3,8);
+  let ans=bikes*2;
+  return {q:`${bikes} bicycles have how many wheels?`,
+    ans, opts:shuffle([ans,ans+2,ans-2]), vis:"🚲"};
+}
+
+/* ---------- BUILD QUESTIONS ---------- */
+const generators=[
+  genAddition,genSubtraction,genMultiplication,
+  genDivision,genApples,genCandies,genBikes
 ];
 
-const answers=new Array(15).fill(null);
+const TOTAL=15;
+const questions=[];
+for(let i=0;i<TOTAL;i++){
+  const g=generators[rand(0,generators.length-1)];
+  questions.push(g());
+}
 
+const answers=new Array(TOTAL).fill(null);
+let current=0;
+let name="";
+
+/* ---------- GAME LOGIC ---------- */
 function startGame(){
- name=document.getElementById("nameInput").value||"Student";
- document.getElementById("nameScreen").style.display="none";
- document.getElementById("gameScreen").style.display="block";
- buildJumpNav();
- loadQ();
+  name=document.getElementById("nameInput").value||"Student";
+  document.getElementById("nameScreen").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
+  buildJumpNav();
+  loadQ();
 }
 
 function loadQ(){
- document.getElementById("progress").innerHTML=
-  `Question ${current+1} of 15`;
+  document.getElementById("progress").innerHTML=
+    `Question ${current+1} of ${TOTAL}`;
 
- const q=questions[current];
- document.getElementById("questionArea").innerHTML=
-  `<div class="visual">${q.vis}</div>
-   <div class="question">${q.q}</div>`;
+  const q=questions[current];
+  document.getElementById("questionArea").innerHTML=
+    `<div class="visual">${q.vis}</div>
+     <div class="question">${q.q}</div>`;
 
- const optDiv=document.getElementById("options");
- optDiv.innerHTML="";
- q.opts.forEach(v=>{
-  const b=document.createElement("button");
-  b.innerHTML=v;
-  if(answers[current]===v) b.classList.add("selected");
-  b.onclick=()=>{
-    answers[current]=v;
-    loadQ();
-  };
-  optDiv.appendChild(b);
- });
+  const optDiv=document.getElementById("options");
+  optDiv.innerHTML="";
+  q.opts.forEach(v=>{
+    const b=document.createElement("button");
+    b.innerHTML=v;
+    if(answers[current]===v) b.classList.add("selected");
+    b.onclick=()=>{answers[current]=v; loadQ();};
+    optDiv.appendChild(b);
+  });
 
- updateJumpNav();
+  updateJumpNav();
 }
 
-function nextQ(){ if(current<14){current++;loadQ();} }
-function prevQ(){ if(current>0){current--;loadQ();} }
+function nextQ(){ if(current<TOTAL-1){current++; loadQ();} }
+function prevQ(){ if(current>0){current--; loadQ();} }
 
 function buildJumpNav(){
- const j=document.getElementById("jumpNav");
- j.innerHTML="";
- questions.forEach((_,i)=>{
-  const b=document.createElement("button");
-  b.className="jump";
-  b.innerText=i+1;
-  b.onclick=()=>{current=i;loadQ();};
-  j.appendChild(b);
- });
+  const j=document.getElementById("jumpNav");
+  j.innerHTML="";
+  for(let i=0;i<TOTAL;i++){
+    const b=document.createElement("button");
+    b.className="jump";
+    b.innerText=i+1;
+    b.onclick=()=>{current=i; loadQ();};
+    j.appendChild(b);
+  }
 }
 
 function updateJumpNav(){
- document.querySelectorAll(".jump").forEach((b,i)=>{
-  b.style.background=answers[i]!==null?"#2ecc71":"#ccc";
-  b.style.color="#000";
- });
+  document.querySelectorAll(".jump").forEach((b,i)=>{
+    b.style.background=answers[i]!=null?"#2ecc71":"#ccc";
+    b.style.color="#000";
+  });
 }
 
+/* ---------- REVIEW & SUBMIT ---------- */
 function openReview(){
- document.getElementById("gameScreen").style.display="none";
- document.getElementById("reviewScreen").style.display="block";
+  document.getElementById("gameScreen").style.display="none";
+  document.getElementById("reviewScreen").style.display="block";
 
- let html="";
- questions.forEach((q,i)=>{
-  html+=`
-   <div class="review-card">
-    <b>Q${i+1}.</b> ${q.q}<br>
-    <i>Your answer:</i> ${answers[i] ?? "Not answered"}
-   </div>`;
- });
- document.getElementById("reviewArea").innerHTML=html;
+  let html="";
+  questions.forEach((q,i)=>{
+    html+=`
+      <div class="review-card">
+        <b>Q${i+1}.</b> ${q.q}<br>
+        <i>Your answer:</i> ${answers[i] ?? "Not answered"}
+      </div>`;
+  });
+  document.getElementById("reviewArea").innerHTML=html;
 }
 
 function backToGame(){
- document.getElementById("reviewScreen").style.display="none";
- document.getElementById("gameScreen").style.display="block";
+  document.getElementById("reviewScreen").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
 }
 
 function submitFinal(){
- let score=0;
- questions.forEach((q,i)=>{
-  if(answers[i]===q.ans) score++;
- });
+  let score=0;
+  questions.forEach((q,i)=>{
+    if(answers[i]===q.ans) score++;
+  });
 
- document.getElementById("reviewScreen").style.display="none";
- document.getElementById("resultScreen").style.display="block";
- document.getElementById("scoreText").innerHTML=
-  `${name}, you scored <b>${score} / 15</b>`;
+  document.getElementById("reviewScreen").style.display="none";
+  document.getElementById("resultScreen").style.display="block";
+  document.getElementById("scoreText").innerHTML=
+    `${name}, you scored <b>${score} / ${TOTAL}</b>`;
 }
 </script>
 
