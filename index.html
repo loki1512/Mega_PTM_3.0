@@ -6,7 +6,7 @@
 
 <style>
 body{
-  font-family: "Comic Sans MS", cursive;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   background: linear-gradient(135deg,#fdfbfb,#ebedee);
   margin:0; padding:10px;
   text-align:center;
@@ -21,7 +21,7 @@ body{
   box-shadow:0 6px 14px rgba(0,0,0,.15);
 }
 
-h1{margin:6px;font-size:32px;}
+h1{margin:6px;font-size:30px;}
 button{
   font-size:20px;
   padding:10px 14px;
@@ -31,18 +31,18 @@ button{
   background:#4a90e2;
   color:#fff;
 }
-button.secondary{background:#999;}
+button.secondary{background:#777;}
 button.nav{background:#ffb300;color:#000;}
 button.jump{font-size:16px;padding:6px 10px;margin:3px;}
 button.selected{background:#2ecc71;}
 .options button{width:90%;}
 
 .question{
-  font-size:26px;
+  font-size:24px;
   margin:12px 0;
 }
 .visual{
-  font-size:46px;
+  font-size:44px;
   margin:8px;
 }
 
@@ -67,7 +67,7 @@ footer{font-size:14px;color:#666;margin-top:10px;}
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
   <p>Enter your name</p>
-  <input id="nameInput" style="font-size:22px;padding:8px;width:85%;text-align:center;border-radius:10px;">
+  <input id="nameInput" style="font-size:20px;padding:8px;width:85%;text-align:center;border-radius:10px;">
   <br><br>
   <button onclick="startGame()">Start</button>
 </div>
@@ -86,13 +86,22 @@ footer{font-size:14px;color:#666;margin-top:10px;}
   <div id="jumpNav"></div>
 
   <br>
-  <button class="secondary" onclick="finishGame()">Finish</button>
+  <button class="secondary" onclick="openReview()">Review Answers</button>
 </div>
 
 <!-- REVIEW SCREEN -->
 <div id="reviewScreen" style="display:none;">
   <h2>📝 Review</h2>
   <div id="reviewArea"></div>
+
+  <button class="secondary" onclick="backToGame()">⬅ Edit Answers</button>
+  <button onclick="submitFinal()">✅ Submit</button>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="card" style="display:none;">
+  <h2>🎉 Result</h2>
+  <p id="scoreText"></p>
   <button onclick="location.reload()">🔄 Replay</button>
 </div>
 
@@ -103,24 +112,24 @@ let name="";
 let current=0;
 
 const questions=[
- {q:"24 + 36 = ?",opts:[50,60,70],vis:"➕"},
- {q:"56 − 19 = ?",opts:[37,39,41],vis:"➖"},
- {q:"7 × 8 = ?",opts:[48,56,64],vis:"✖️"},
- {q:"48 ÷ 6 = ?",opts:[6,8,10],vis:"➗"},
+ {q:"24 + 36 = ?",opts:[50,60,70],ans:60,vis:"➕"},
+ {q:"56 − 19 = ?",opts:[37,39,41],ans:37,vis:"➖"},
+ {q:"7 × 8 = ?",opts:[48,56,64],ans:56,vis:"✖️"},
+ {q:"48 ÷ 6 = ?",opts:[6,8,10],ans:8,vis:"➗"},
 
- {q:"🍎🍎🍎 + 🍎🍎<br>How many apples?",opts:[4,5,6],vis:"🍎"},
- {q:"12 candies shared by 3 children.<br>Each gets?",opts:[3,4,5],vis:"🍬"},
- {q:"4 bicycles have how many wheels?",opts:[6,8,10],vis:"🚲"},
- {q:"25 books, 9 borrowed.<br>Books left?",opts:[14,16,18],vis:"📚"},
+ {q:"🍎🍎🍎 + 🍎🍎<br>How many apples?",opts:[4,5,6],ans:5,vis:"🍎"},
+ {q:"12 candies shared by 3 children.<br>Each gets?",opts:[3,4,5],ans:4,vis:"🍬"},
+ {q:"4 bicycles have how many wheels?",opts:[6,8,10],ans:8,vis:"🚲"},
+ {q:"25 books, 9 borrowed.<br>Books left?",opts:[14,16,18],ans:16,vis:"📚"},
 
- {q:"345 + 120 = ?",opts:[455,465,475],vis:"➕"},
- {q:"600 − 275 = ?",opts:[315,325,335],vis:"➖"},
- {q:"9 × 6 = ?",opts:[45,54,63],vis:"✖️"},
- {q:"81 ÷ 9 = ?",opts:[7,8,9],vis:"➗"},
+ {q:"345 + 120 = ?",opts:[455,465,475],ans:465,vis:"➕"},
+ {q:"600 − 275 = ?",opts:[315,325,335],ans:325,vis:"➖"},
+ {q:"9 × 6 = ?",opts:[45,54,63],ans:54,vis:"✖️"},
+ {q:"81 ÷ 9 = ?",opts:[7,8,9],ans:9,vis:"➗"},
 
- {q:"5 bags with 6 oranges each.<br>Total oranges?",opts:[25,30,35],vis:"🍊"},
- {q:"₹100 − ₹37 = ?",opts:[53,63,73],vis:"💰"},
- {q:"3 tables with 4 legs each.<br>Total legs?",opts:[10,12,14],vis:"🪑"}
+ {q:"5 bags with 6 oranges each.<br>Total oranges?",opts:[25,30,35],ans:30,vis:"🍊"},
+ {q:"₹100 − ₹37 = ?",opts:[53,63,73],ans:63,vis:"💰"},
+ {q:"3 tables with 4 legs each.<br>Total legs?",opts:[10,12,14],ans:12,vis:"🪑"}
 ];
 
 const answers=new Array(15).fill(null);
@@ -180,7 +189,7 @@ function updateJumpNav(){
  });
 }
 
-function finishGame(){
+function openReview(){
  document.getElementById("gameScreen").style.display="none";
  document.getElementById("reviewScreen").style.display="block";
 
@@ -193,6 +202,23 @@ function finishGame(){
    </div>`;
  });
  document.getElementById("reviewArea").innerHTML=html;
+}
+
+function backToGame(){
+ document.getElementById("reviewScreen").style.display="none";
+ document.getElementById("gameScreen").style.display="block";
+}
+
+function submitFinal(){
+ let score=0;
+ questions.forEach((q,i)=>{
+  if(answers[i]===q.ans) score++;
+ });
+
+ document.getElementById("reviewScreen").style.display="none";
+ document.getElementById("resultScreen").style.display="block";
+ document.getElementById("scoreText").innerHTML=
+  `${name}, you scored <b>${score} / 15</b>`;
 }
 </script>
 
