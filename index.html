@@ -4,6 +4,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Math Explorer – Class 4</title>
 
+<!-- Screenshot library -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 body{
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -37,6 +40,7 @@ button.secondary{background:#777;}
 button.nav{background:#ffb300;color:#000;}
 button.jump{font-size:15px;padding:6px 10px;margin:3px;}
 button.selected{background:#2ecc71;}
+button.whatsapp{background:#25D366;font-size:20px;}
 
 .options button{width:90%;}
 
@@ -109,6 +113,8 @@ footer{font-size:14px;color:#666;margin-top:10px;}
 <div id="resultScreen" class="card" style="display:none;">
   <h2>🎉 Result</h2>
   <p id="scoreText"></p>
+
+  <button class="whatsapp" onclick="shareResult()">🟢 Share on WhatsApp</button><br>
   <button onclick="location.reload()">🔄 Replay</button>
 </div>
 
@@ -275,6 +281,21 @@ function submitFinal(){
   document.getElementById("resultScreen").style.display="block";
   document.getElementById("scoreText").innerHTML=
     `${name}, you scored <b>${score} / ${TOTAL}</b>`;
+}
+
+/* ---------- SHARE RESULT ---------- */
+function shareResult(){
+  const target=document.getElementById("resultScreen");
+  html2canvas(target).then(canvas=>{
+    canvas.toBlob(blob=>{
+      const file=new File([blob],"result.png",{type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], title:"Math Result"});
+      } else {
+        alert("Sharing not supported on this device");
+      }
+    });
+  });
 }
 </script>
 
