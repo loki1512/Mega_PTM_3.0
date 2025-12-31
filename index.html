@@ -4,7 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Math Explorer – Class 4</title>
 
-<!-- Screenshot library -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
@@ -40,19 +39,12 @@ button.secondary{background:#777;}
 button.nav{background:#ffb300;color:#000;}
 button.jump{font-size:15px;padding:6px 10px;margin:3px;}
 button.selected{background:#2ecc71;}
-button.whatsapp{background:#25D366;font-size:20px;}
+button.whatsapp{background:#25D366;}
 
 .options button{width:90%;}
 
-.question{
-  font-size:22px;
-  margin:12px 0;
-}
-
-.visual{
-  font-size:44px;
-  margin:8px;
-}
+.question{font-size:22px;margin:12px 0;}
+.visual{font-size:44px;margin:8px;}
 
 #jumpNav{margin-top:10px;}
 
@@ -66,6 +58,9 @@ button.whatsapp{background:#25D366;font-size:20px;}
   text-align:left;
 }
 
+.correct{color:#2ecc71;font-weight:bold;}
+.wrong{color:#e74c3c;font-weight:bold;}
+
 footer{font-size:14px;color:#666;margin-top:10px;}
 </style>
 </head>
@@ -77,8 +72,7 @@ footer{font-size:14px;color:#666;margin-top:10px;}
 <!-- NAME SCREEN -->
 <div id="nameScreen" class="card">
   <p>Enter your name</p>
-  <input id="nameInput"
-         style="font-size:18px;padding:8px;width:85%;text-align:center;border-radius:10px;">
+  <input id="nameInput" style="font-size:18px;padding:8px;width:85%;text-align:center;border-radius:10px;">
   <br><br>
   <button onclick="startGame()">Start</button>
 </div>
@@ -95,17 +89,15 @@ footer{font-size:14px;color:#666;margin-top:10px;}
   </div>
 
   <div id="jumpNav"></div>
-
   <br>
   <button class="secondary" onclick="openReview()">Review Answers</button>
 </div>
 
-<!-- REVIEW SCREEN -->
+<!-- REVIEW BEFORE SUBMIT -->
 <div id="reviewScreen" style="display:none;">
   <h2>📝 Review</h2>
   <div id="reviewArea"></div>
-
-  <button class="secondary" onclick="backToGame()">⬅ Edit Answers</button>
+  <button class="secondary" onclick="backToGame()">⬅ Edit</button>
   <button onclick="submitFinal()">✅ Submit</button>
 </div>
 
@@ -114,188 +106,135 @@ footer{font-size:14px;color:#666;margin-top:10px;}
   <h2>🎉 Result</h2>
   <p id="scoreText"></p>
 
-  <button class="whatsapp" onclick="shareResult()">🟢 Share on WhatsApp</button><br>
+  <button class="whatsapp" onclick="shareResult()">🟢 Share</button><br>
+  <button onclick="openMistakeReview()">🔍 Review Mistakes</button><br>
   <button onclick="location.reload()">🔄 Replay</button>
+</div>
+
+<!-- REVIEW WITH ANSWERS -->
+<div id="mistakeScreen" style="display:none;">
+  <h2>📘 Learn from Mistakes</h2>
+  <div id="mistakeArea"></div>
+  <button onclick="location.reload()">Finish</button>
 </div>
 
 <footer>An MPPS Pedduru Initiative</footer>
 
 <script>
-/* ---------- UTILITIES ---------- */
-function rand(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
-}
-function shuffle(arr){
-  return arr.sort(()=>Math.random()-0.5);
-}
+/* ---------- Utilities ---------- */
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
 
-/* ---------- QUESTION GENERATORS ---------- */
-function genAddition(){
-  let a=rand(100,500), b=rand(10,200);
-  let ans=a+b;
-  return {q:`${a} + ${b} = ?`, ans,
-    opts:shuffle([ans,ans+10,ans-10]), vis:"➕"};
-}
+/* ---------- Question Generators ---------- */
+function genAddition(){let a=rand(100,500),b=rand(10,200),ans=a+b;
+ return {q:`${a} + ${b} = ?`,ans,opts:shuffle([ans,ans+10,ans-10]),vis:"➕"};}
+function genSubtraction(){let a=rand(300,700),b=rand(50,250),ans=a-b;
+ return {q:`${a} − ${b} = ?`,ans,opts:shuffle([ans,ans+10,ans-10]),vis:"➖"};}
+function genMultiplication(){let a=rand(4,9),b=rand(6,12),ans=a*b;
+ return {q:`${a} × ${b} = ?`,ans,opts:shuffle([ans,ans+4,ans-4]),vis:"✖️"};}
+function genDivision(){let b=rand(3,9),ans=rand(4,12),a=b*ans;
+ return {q:`${a} ÷ ${b} = ?`,ans,opts:shuffle([ans,ans+1,ans-1]),vis:"➗"};}
+function genApples(){let a=rand(3,7),b=rand(2,6),ans=a+b;
+ return {q:`${a} apples + ${b} apples.<br>How many apples?`,ans,opts:shuffle([ans,ans+1,ans-1]),vis:"🍎"};}
+function genCandies(){let kids=[2,3,4][rand(0,2)],ans=rand(3,8),total=kids*ans;
+ return {q:`${total} candies shared by ${kids} children.<br>Each gets?`,ans,opts:shuffle([ans,ans+1,ans-1]),vis:"🍬"};}
+function genBikes(){let bikes=rand(3,8),ans=bikes*2;
+ return {q:`${bikes} bicycles have how many wheels?`,ans,opts:shuffle([ans,ans+2,ans-2]),vis:"🚲"};}
 
-function genSubtraction(){
-  let a=rand(300,700), b=rand(50,250);
-  let ans=a-b;
-  return {q:`${a} − ${b} = ?`, ans,
-    opts:shuffle([ans,ans+10,ans-10]), vis:"➖"};
-}
-
-function genMultiplication(){
-  let a=rand(4,9), b=rand(6,12);
-  let ans=a*b;
-  return {q:`${a} × ${b} = ?`, ans,
-    opts:shuffle([ans,ans+4,ans-4]), vis:"✖️"};
-}
-
-function genDivision(){
-  let b=rand(3,9), ans=rand(4,12);
-  let a=b*ans;
-  return {q:`${a} ÷ ${b} = ?`, ans,
-    opts:shuffle([ans,ans+1,ans-1]), vis:"➗"};
-}
-
-function genApples(){
-  let a=rand(3,7), b=rand(2,6);
-  let ans=a+b;
-  return {q:`${a} apples + ${b} apples.<br>How many apples?`,
-    ans, opts:shuffle([ans,ans+1,ans-1]), vis:"🍎"};
-}
-
-function genCandies(){
-  let kids=[2,3,4][rand(0,2)];
-  let ans=rand(3,8);
-  let total=kids*ans;
-  return {q:`${total} candies shared by ${kids} children.<br>Each gets?`,
-    ans, opts:shuffle([ans,ans+1,ans-1]), vis:"🍬"};
-}
-
-function genBikes(){
-  let bikes=rand(3,8);
-  let ans=bikes*2;
-  return {q:`${bikes} bicycles have how many wheels?`,
-    ans, opts:shuffle([ans,ans+2,ans-2]), vis:"🚲"};
-}
-
-/* ---------- BUILD QUESTIONS ---------- */
-const generators=[
-  genAddition,genSubtraction,genMultiplication,
-  genDivision,genApples,genCandies,genBikes
-];
-
+/* ---------- Build Questions ---------- */
+const generators=[genAddition,genSubtraction,genMultiplication,genDivision,genApples,genCandies,genBikes];
 const TOTAL=15;
 const questions=[];
-for(let i=0;i<TOTAL;i++){
-  const g=generators[rand(0,generators.length-1)];
-  questions.push(g());
-}
+for(let i=0;i<TOTAL;i++) questions.push(generators[rand(0,generators.length-1)]());
 
 const answers=new Array(TOTAL).fill(null);
-let current=0;
-let name="";
+let current=0, name="", finalScore=0;
 
-/* ---------- GAME LOGIC ---------- */
+/* ---------- Game Logic ---------- */
 function startGame(){
-  name=document.getElementById("nameInput").value||"Student";
-  document.getElementById("nameScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="block";
-  buildJumpNav();
-  loadQ();
+ name=document.getElementById("nameInput").value||"Student";
+ nameScreen.style.display="none";
+ gameScreen.style.display="block";
+ buildJumpNav(); loadQ();
 }
 
 function loadQ(){
-  document.getElementById("progress").innerHTML=
-    `Question ${current+1} of ${TOTAL}`;
-
-  const q=questions[current];
-  document.getElementById("questionArea").innerHTML=
-    `<div class="visual">${q.vis}</div>
-     <div class="question">${q.q}</div>`;
-
-  const optDiv=document.getElementById("options");
-  optDiv.innerHTML="";
-  q.opts.forEach(v=>{
-    const b=document.createElement("button");
-    b.innerHTML=v;
-    if(answers[current]===v) b.classList.add("selected");
-    b.onclick=()=>{answers[current]=v; loadQ();};
-    optDiv.appendChild(b);
-  });
-
-  updateJumpNav();
+ progress.innerHTML=`Question ${current+1} of ${TOTAL}`;
+ const q=questions[current];
+ questionArea.innerHTML=`<div class="visual">${q.vis}</div><div class="question">${q.q}</div>`;
+ options.innerHTML="";
+ q.opts.forEach(v=>{
+  const b=document.createElement("button");
+  b.innerHTML=v;
+  if(answers[current]===v) b.classList.add("selected");
+  b.onclick=()=>{answers[current]=v;loadQ();};
+  options.appendChild(b);
+ });
+ updateJumpNav();
 }
 
-function nextQ(){ if(current<TOTAL-1){current++; loadQ();} }
-function prevQ(){ if(current>0){current--; loadQ();} }
+function nextQ(){if(current<TOTAL-1){current++;loadQ();}}
+function prevQ(){if(current>0){current--;loadQ();}}
 
 function buildJumpNav(){
-  const j=document.getElementById("jumpNav");
-  j.innerHTML="";
-  for(let i=0;i<TOTAL;i++){
-    const b=document.createElement("button");
-    b.className="jump";
-    b.innerText=i+1;
-    b.onclick=()=>{current=i; loadQ();};
-    j.appendChild(b);
-  }
+ jumpNav.innerHTML="";
+ for(let i=0;i<TOTAL;i++){
+  const b=document.createElement("button");
+  b.className="jump"; b.innerText=i+1;
+  b.onclick=()=>{current=i;loadQ();};
+  jumpNav.appendChild(b);
+ }
 }
-
 function updateJumpNav(){
-  document.querySelectorAll(".jump").forEach((b,i)=>{
-    b.style.background=answers[i]!=null?"#2ecc71":"#ccc";
-    b.style.color="#000";
-  });
+ document.querySelectorAll(".jump").forEach((b,i)=>{
+  b.style.background=answers[i]!=null?"#2ecc71":"#ccc";
+  b.style.color="#000";
+ });
 }
 
-/* ---------- REVIEW & SUBMIT ---------- */
+/* ---------- Review & Submit ---------- */
 function openReview(){
-  document.getElementById("gameScreen").style.display="none";
-  document.getElementById("reviewScreen").style.display="block";
-
-  let html="";
-  questions.forEach((q,i)=>{
-    html+=`
-      <div class="review-card">
-        <b>Q${i+1}.</b> ${q.q}<br>
-        <i>Your answer:</i> ${answers[i] ?? "Not answered"}
-      </div>`;
-  });
-  document.getElementById("reviewArea").innerHTML=html;
+ gameScreen.style.display="none";
+ reviewScreen.style.display="block";
+ reviewArea.innerHTML=questions.map((q,i)=>`
+  <div class="review-card">
+   <b>Q${i+1}.</b> ${q.q}<br>
+   Your answer: ${answers[i] ?? "Not answered"}
+  </div>`).join("");
 }
 
-function backToGame(){
-  document.getElementById("reviewScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="block";
-}
+function backToGame(){reviewScreen.style.display="none";gameScreen.style.display="block";}
 
 function submitFinal(){
-  let score=0;
-  questions.forEach((q,i)=>{
-    if(answers[i]===q.ans) score++;
-  });
-
-  document.getElementById("reviewScreen").style.display="none";
-  document.getElementById("resultScreen").style.display="block";
-  document.getElementById("scoreText").innerHTML=
-    `${name}, you scored <b>${score} / ${TOTAL}</b>`;
+ finalScore=0;
+ questions.forEach((q,i)=>{if(answers[i]===q.ans) finalScore++;});
+ reviewScreen.style.display="none";
+ resultScreen.style.display="block";
+ scoreText.innerHTML=`${name}, you scored <b>${finalScore}/${TOTAL}</b>`;
 }
 
-/* ---------- SHARE RESULT ---------- */
+/* ---------- Mistake Review ---------- */
+function openMistakeReview(){
+ resultScreen.style.display="none";
+ mistakeScreen.style.display="block";
+ mistakeArea.innerHTML=questions.map((q,i)=>`
+  <div class="review-card">
+   <b>Q${i+1}.</b> ${q.q}<br>
+   Your answer: <span class="${answers[i]===q.ans?'correct':'wrong'}">${answers[i] ?? "Not answered"}</span><br>
+   Correct answer: <span class="correct">${q.ans}</span>
+  </div>`).join("");
+}
+
+/* ---------- Share ---------- */
 function shareResult(){
-  const target=document.getElementById("resultScreen");
-  html2canvas(target).then(canvas=>{
-    canvas.toBlob(blob=>{
-      const file=new File([blob],"result.png",{type:"image/png"});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        navigator.share({files:[file], title:"Math Result"});
-      } else {
-        alert("Sharing not supported on this device");
-      }
-    });
+ html2canvas(resultScreen).then(c=>{
+  c.toBlob(b=>{
+   const f=new File([b],"result.png",{type:"image/png"});
+   if(navigator.canShare&&navigator.canShare({files:[f]})){
+    navigator.share({files:[f],title:"Math Result"});
+   }
   });
+ });
 }
 </script>
 
