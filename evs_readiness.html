@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVS Readiness: Learn & Play</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --sky: #4FC3F7;
+    --sun: #FFD600;
+    --grass: #66BB6A;
+    --coral: #FF7043;
+    --purple: #AB47BC;
+    --pink: #EC407A;
+    --teal: #26C6DA;
+    --orange: #FFA726;
+    --bg: #FFF9F0;
+    --card: #FFFFFF;
+    --text: #2D2D2D;
+    --muted: #6B6B6B;
+    --radius: 20px;
+    --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === CONFETTI CANVAS === */
+  #confetti-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* === HEADER === */
+  header {
+    background: linear-gradient(135deg, #FF6F00 0%, #FFD600 50%, #66BB6A 100%);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.05) 0px,
+      rgba(255,255,255,0.05) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+  }
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: #fff;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .header-sub {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 0.3rem;
+    font-weight: 700;
+    position: relative;
+  }
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 50px;
+    padding: 0.3rem 1rem;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #fff;
+    margin-top: 0.7rem;
+    position: relative;
+  }
+
+  /* === MODULES GRID === */
+  .modules-screen {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  .modules-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #FF6F00;
+  }
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  .module-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.4rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-card:hover { transform: translateY(-5px) scale(1.03); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+  .module-card.done { border-color: var(--grass); }
+  .module-card.done::after {
+    content: '✓';
+    position: absolute; top: 8px; right: 12px;
+    font-size: 1.2rem; color: var(--grass); font-weight: 900;
+  }
+  .module-icon { font-size: 3rem; margin-bottom: 0.5rem; line-height: 1; }
+  .module-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .module-progress {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+  .module-bar {
+    height: 6px;
+    background: #eee;
+    border-radius: 99px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .module-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--grass);
+    transition: width 0.5s;
+  }
+
+  /* === LESSON SCREEN === */
+  .lesson-screen {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    display: none;
+  }
+  .lesson-screen.active { display: block; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 2.5px solid var(--orange);
+    color: var(--orange);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background 0.15s, color 0.15s;
+  }
+  .back-btn:hover { background: var(--orange); color: #fff; }
+
+  .lesson-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .lesson-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lesson-dot.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .lesson-dot.done { background: var(--grass); border-color: var(--grass); color: #fff; }
+
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.8rem 1.5rem;
+    position: relative;
+  }
+  .q-type-badge {
+    display: inline-block;
+    background: #FFE0B2;
+    color: #E65100;
+    border-radius: 50px;
+    padding: 0.2rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+  }
+  .q-prompt {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  /* Multiple choice / image selection */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+  }
+  .option-btn {
+    background: #F5F5F5;
+    border: 3px solid #E0E0E0;
+    border-radius: 14px;
+    padding: 1rem 0.8rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--orange); background: #FFF3E0; transform: scale(1.03); }
+  .option-btn.correct { background: #E8F5E9; border-color: var(--grass); color: #2E7D32; }
+  .option-btn.wrong { background: #FFEBEE; border-color: #EF5350; color: #C62828; }
+  .option-btn.reveal { background: #E8F5E9; border-color: var(--grass); color: #2E7D32; }
+  .option-btn:disabled { cursor: default; }
+  .option-emoji { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+
+  /* True/False */
+  .tf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .tf-btn {
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 3px solid #E0E0E0;
+    background: #F5F5F5;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tf-btn:hover:not(:disabled) { transform: scale(1.04); }
+  .tf-btn.true-btn:hover:not(:disabled) { background: #E8F5E9; border-color: var(--grass); }
+  .tf-btn.false-btn:hover:not(:disabled) { background: #FFEBEE; border-color: #EF5350; }
+  .tf-btn.correct { background: #E8F5E9; border-color: var(--grass); }
+  .tf-btn.wrong { background: #FFEBEE; border-color: #EF5350; }
+  .tf-btn.reveal { background: #E8F5E9; border-color: var(--grass); }
+
+  /* Fill in blank */
+  .fitb-wrap { display: flex; flex-direction: column; gap: 0.7rem; }
+  .fitb-option {
+    background: #F5F5F5;
+    border: 3px solid #E0E0E0;
+    border-radius: 14px;
+    padding: 0.9rem 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+  }
+  .fitb-option:hover:not(:disabled) { border-color: var(--purple); background: #F3E5F5; }
+  .fitb-option.correct { background: #E8F5E9; border-color: var(--grass); color: #2E7D32; }
+  .fitb-option.wrong { background: #FFEBEE; border-color: #EF5350; color: #C62828; }
+  .fitb-option.reveal { background: #E8F5E9; border-color: var(--grass); color: #2E7D32; }
+
+  /* Matching */
+  .match-wrap { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+  .match-col { flex: 1; min-width: 130px; display: flex; flex-direction: column; gap: 0.6rem; }
+  .match-col-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; letter-spacing: 0.05em; }
+  .match-item {
+    background: #F0F4FF;
+    border: 2.5px solid #C5CAE9;
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .match-item:hover:not(.matched):not(:disabled) { background: #E8EAF6; border-color: var(--purple); }
+  .match-item.selected { background: #CE93D8; border-color: var(--purple); color: #fff; }
+  .match-item.matched { background: #E8F5E9; border-color: var(--grass); color: #2E7D32; cursor: default; }
+  .match-item.wrong-flash { background: #FFEBEE; border-color: #EF5350; }
+  .match-connector { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; padding-top: 1.5rem; }
+
+  /* Sorting / Classification */
+  .sort-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+    min-height: 50px;
+    padding: 0.8rem;
+    background: #F5F5F5;
+    border-radius: 14px;
+    border: 2.5px dashed #DDD;
+  }
+  .sort-chip {
+    background: #fff;
+    border: 2.5px solid #E0E0E0;
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: grab;
+    transition: all 0.15s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sort-chip:hover { border-color: var(--teal); background: #E0F7FA; }
+  .sort-chip.dragging { opacity: 0.4; }
+  .sort-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.8rem;
+  }
+  .sort-bucket {
+    background: #FAFAFA;
+    border: 2.5px dashed #BDBDBD;
+    border-radius: 14px;
+    padding: 0.8rem;
+    min-height: 80px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .sort-bucket.drag-over { background: #E0F7FA; border-color: var(--teal); }
+  .sort-bucket-title {
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .sort-bucket-items { display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 40px; }
+  .sort-bucket-items .sort-chip { font-size: 0.85rem; padding: 0.3rem 0.7rem; cursor: pointer; }
+  .sort-check-btn {
+    margin-top: 1rem;
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 0.7rem 1.8rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .sort-check-btn:hover { background: #8E24AA; transform: scale(1.04); }
+
+  /* Label image (interactive zones) */
+  .label-img-wrap {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .plant-svg { width: 100%; max-width: 280px; display: block; margin: 0 auto; }
+  .label-zone {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border: 2.5px dashed #999;
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .label-zone:hover { border-color: var(--orange); background: #FFF3E0; }
+  .label-zone.placed { border-style: solid; border-color: var(--grass); background: #E8F5E9; color: #2E7D32; cursor: default; }
+  .label-options-tray {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: #F9F9F9;
+    border-radius: 14px;
+    border: 2px solid #EEE;
+  }
+  .label-chip {
+    background: #fff;
+    border: 2.5px solid #C5CAE9;
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .label-chip:hover { background: #E8EAF6; border-color: var(--purple); }
+  .label-chip.selected { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .label-chip.used { opacity: 0.35; cursor: default; pointer-events: none; }
+
+  /* Feedback */
+  .feedback-bar {
+    display: none;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .feedback-bar.show { display: flex; }
+  .feedback-bar.correct-fb { background: #E8F5E9; color: #2E7D32; border: 2px solid #A5D6A7; }
+  .feedback-bar.wrong-fb { background: #FFEBEE; color: #C62828; border: 2px solid #EF9A9A; }
+  .feedback-icon { font-size: 1.5rem; }
+
+  /* Next button */
+  .next-btn {
+    display: none;
+    margin-top: 1.2rem;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 0.8rem 2rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    box-shadow: 0 4px 0 #E65100;
+  }
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #E65100; }
+  .next-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #E65100; }
+  .next-btn.show { display: inline-block; }
+
+  /* Result screen */
+  .result-screen {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    text-align: center;
+    display: none;
+  }
+  .result-screen.active { display: block; }
+  .result-trophy { font-size: 5rem; margin-bottom: 1rem; animation: bounce 0.6s ease infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+  .result-title { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #FF6F00; margin-bottom: 0.5rem; }
+  .result-score { font-family: 'Fredoka One', cursive; font-size: 3.5rem; color: var(--grass); margin: 0.5rem 0; }
+  .result-msg { font-size: 1.1rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .result-stars { font-size: 2.5rem; margin-bottom: 1rem; letter-spacing: 0.2em; }
+  .result-retry-btn, .result-home-btn {
+    display: inline-block;
+    border-radius: 50px;
+    padding: 0.8rem 2rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: none;
+    margin: 0.4rem;
+    transition: transform 0.15s;
+  }
+  .result-retry-btn { background: var(--orange); color: #fff; box-shadow: 0 4px 0 #E65100; }
+  .result-home-btn { background: var(--sky); color: #fff; box-shadow: 0 4px 0 #0288D1; }
+  .result-retry-btn:hover, .result-home-btn:hover { transform: translateY(-2px); }
+
+  /* Floating emojis decoration */
+  .floaters { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+  .floater {
+    position: absolute;
+    font-size: 1.5rem;
+    opacity: 0.12;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0.12; }
+    100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+  }
+
+  /* Bouncing stars */
+  .star-burst {
+    position: fixed;
+    pointer-events: none;
+    z-index: 998;
+    font-size: 2rem;
+    animation: starBurst 0.7s ease-out forwards;
+  }
+  @keyframes starBurst {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    60% { transform: scale(1.4) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0.8) rotate(360deg) translateY(-40px); opacity: 0; }
+  }
+
+  .modules-screen, .lesson-screen, .result-screen { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div class="floaters" id="floaters"></div>
+
+<header>
+  <div class="header-title">🌿 EVS Readiness: Learn & Play 🌟</div>
+  <div class="header-sub">Class 5 Bridge Course</div>
+  <div class="score-badge" id="header-score">⭐ Score: <span id="total-score">0</span> pts</div>
+</header>
+
+<!-- HOME / MODULES SCREEN -->
+<div class="modules-screen" id="modules-screen">
+  <div class="modules-title">🎒 Pick a Module to Explore!</div>
+  <div class="modules-grid" id="modules-grid"></div>
+</div>
+
+<!-- LESSON SCREEN -->
+<div class="lesson-screen" id="lesson-screen">
+  <button class="back-btn" onclick="goHome()">← Back to Modules</button>
+  <div id="lesson-module-title" style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:#AB47BC;margin-bottom:0.8rem;"></div>
+  <div class="lesson-nav" id="lesson-nav"></div>
+  <div class="question-card" id="question-card"></div>
+  <div class="feedback-bar" id="feedback-bar">
+    <span class="feedback-icon" id="feedback-icon"></span>
+    <span id="feedback-text"></span>
+  </div>
+  <button class="next-btn" id="next-btn" onclick="nextLesson()">Next ➜</button>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="result-screen" id="result-screen">
+  <div class="result-trophy">🏆</div>
+  <div class="result-title">Module Complete!</div>
+  <div class="result-stars" id="result-stars"></div>
+  <div class="result-score" id="result-score-display"></div>
+  <div class="result-msg" id="result-msg"></div>
+  <button class="result-retry-btn" onclick="retryModule()">🔄 Try Again</button>
+  <button class="result-home-btn" onclick="goHome()">🏠 All Modules</button>
+</div>
+
+<!-- AUDIO: Web Audio API festive tones -->
+<script>
+// ==================== DATA ====================
+const MODULES = [
+  {
+    id: 1,
+    title: "Plants Around Us",
+    icon: "🌱",
+    color: "#66BB6A",
+    lessons: [
+      {
+        id: "1.1",
+        type: "label_image",
+        badge: "Label It!",
+        prompt: "Label the parts of the tomato plant.",
+        parts: [
+          { name: "Roots", hint: "Underground part 🌱", x: "42%", y: "88%" },
+          { name: "Stem", hint: "Middle trunk part 🌿", x: "42%", y: "65%" },
+          { name: "Leaf", hint: "Green flat part 🍃", x: "68%", y: "45%" },
+          { name: "Flower", hint: "Pretty part 🌸", x: "18%", y: "30%" },
+          { name: "Fruit", hint: "Red round part 🍅", x: "58%", y: "22%" }
+        ]
+      },
+      {
+        id: "1.2",
+        type: "image_selection",
+        badge: "Choose It!",
+        prompt: "Select the aquatic plant that grows in water.",
+        options: [
+          { text: "Water Lily", emoji: "🪷", correct: true },
+          { text: "Mango Tree", emoji: "🥭", correct: false },
+          { text: "Banana Tree", emoji: "🍌", correct: false }
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Animals & Birds",
+    icon: "🦁",
+    color: "#FFA726",
+    lessons: [
+      {
+        id: "2.1",
+        type: "sorting",
+        badge: "Sort It!",
+        prompt: "Sort these animals into Herbivores, Carnivores, and Omnivores.",
+        items: [
+          { name: "🦁 Lion", category: "Carnivores" },
+          { name: "🐯 Tiger", category: "Carnivores" },
+          { name: "🐰 Rabbit", category: "Herbivores" },
+          { name: "🐶 Dog", category: "Omnivores" },
+          { name: "🐦 Crow", category: "Omnivores" },
+          { name: "🐄 Cow", category: "Herbivores" }
+        ],
+        categories: ["Herbivores", "Carnivores", "Omnivores"]
+      },
+      {
+        id: "2.2",
+        type: "true_false",
+        badge: "True or False?",
+        prompt: "Elephants and Ants both live in groups.",
+        correct: "True",
+        fact: "Yes! Elephants live in herds 🐘 and ants live in colonies 🐜. Both are group animals!"
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Sense Organs",
+    icon: "👁️",
+    color: "#26C6DA",
+    lessons: [
+      {
+        id: "3.1",
+        type: "matching",
+        badge: "Match It!",
+        prompt: "Match the sense organ to what it helps us do.",
+        pairs: [
+          { item: "👁️ Eye", match: "to see" },
+          { item: "👃 Nose", match: "to smell" },
+          { item: "👅 Tongue", match: "to taste" },
+          { item: "👂 Ear", match: "to hear" },
+          { item: "🖐️ Skin", match: "to feel" }
+        ]
+      },
+      {
+        id: "3.2",
+        type: "fill_blank",
+        badge: "Fill the Blank!",
+        prompt: "I smell with my ______.",
+        sentence: "I smell with my",
+        options: ["eyes", "nose", "ears", "tongue"],
+        correct: "nose"
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Food & Water",
+    icon: "🥗",
+    color: "#EC407A",
+    lessons: [
+      {
+        id: "4.1",
+        type: "sorting",
+        badge: "Sort It!",
+        prompt: "Sort these into Healthy and Unhealthy food.",
+        items: [
+          { name: "🥦 Vegetables", category: "Healthy" },
+          { name: "🥛 Milk", category: "Healthy" },
+          { name: "🍕 Pizza", category: "Unhealthy" },
+          { name: "🍩 Donut", category: "Unhealthy" },
+          { name: "🥤 Cool Drink", category: "Unhealthy" }
+        ],
+        categories: ["Healthy", "Unhealthy"]
+      },
+      {
+        id: "4.2",
+        type: "multiple_choice",
+        badge: "Pick It!",
+        prompt: "Which of the following is a source of water?",
+        options: [
+          { text: "Well", emoji: "🪣", correct: true },
+          { text: "Hammer", emoji: "🔨", correct: false },
+          { text: "Spade", emoji: "🛠️", correct: false }
+        ]
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Community Helpers",
+    icon: "👩‍🌾",
+    color: "#AB47BC",
+    lessons: [
+      {
+        id: "5.1",
+        type: "matching",
+        badge: "Match It!",
+        prompt: "Match the community helper with their tool.",
+        pairs: [
+          { item: "👨‍🌾 Farmer", match: "🛠️ Spade" },
+          { item: "🪚 Carpenter", match: "🔨 Saw/Hammer" },
+          { item: "🧵 Tailor", match: "📏 Measuring Tape" }
+        ]
+      },
+      {
+        id: "5.2",
+        type: "riddle",
+        badge: "Riddle Time!",
+        prompt: "I mend and repair shoes. Who am I?",
+        options: [
+          { text: "Teacher", emoji: "📚", correct: false },
+          { text: "Cobbler", emoji: "👟", correct: true },
+          { text: "Postman", emoji: "📮", correct: false },
+          { text: "Doctor", emoji: "🩺", correct: false }
+        ]
+      }
+    ]
+  }
+];
+
+// ==================== STATE ====================
+let currentModule = null;
+let currentLessonIdx = 0;
+let lessonScore = 0;
+let moduleProgress = {}; // { moduleId: { done: [lessonIds], score: n } }
+let totalScore = 0;
+let matchSelectedLeft = null;
+let matchSelectedRight = null;
+let matchDone = {};
+let labelSelectedChip = null;
+let labelPlacements = {};
+let sortBuckets = {};
+
+// ==================== AUDIO ====================
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+function playTone(freq, type = 'sine', dur = 0.15, vol = 0.3) {
+  const o = AC.createOscillator();
+  const g = AC.createGain();
+  o.connect(g); g.connect(AC.destination);
+  o.type = type;
+  o.frequency.setValueAtTime(freq, AC.currentTime);
+  g.gain.setValueAtTime(vol, AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+  o.start(AC.currentTime);
+  o.stop(AC.currentTime + dur);
+}
+function playCorrect() {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 'triangle', 0.2, 0.25), i * 80));
+}
+function playWrong() {
+  [300, 250].forEach((f, i) => setTimeout(() => playTone(f, 'sawtooth', 0.25, 0.2), i * 120));
+}
+function playClick() { playTone(440, 'sine', 0.08, 0.15); }
+function playFanfare() {
+  const melody = [523,587,659,698,784,880,988,1047];
+  melody.forEach((f, i) => setTimeout(() => playTone(f, 'triangle', 0.25, 0.3), i * 100));
+}
+function playBgLoop() {
+  // Simple festive arpeggio loop
+  const notes = [262, 330, 392, 523, 392, 330];
+  let i = 0;
+  setInterval(() => {
+    playTone(notes[i % notes.length], 'triangle', 0.3, 0.06);
+    i++;
+  }, 400);
+}
+
+// ==================== CONFETTI ====================
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+let confettiPieces = [];
+let confettiRunning = false;
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+function launchConfetti(count = 80) {
+  const colors = ['#FF6F00','#FFD600','#66BB6A','#26C6DA','#AB47BC','#EC407A','#FF7043'];
+  for (let i = 0; i < count; i++) {
+    confettiPieces.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      vx: (Math.random() - 0.5) * 6,
+      vy: Math.random() * 4 + 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 10 + 5,
+      rot: Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 8,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
+    });
+  }
+  if (!confettiRunning) animateConfetti();
+}
+function animateConfetti() {
+  confettiRunning = true;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  confettiPieces = confettiPieces.filter(p => p.y < canvas.height + 20);
+  confettiPieces.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    if (p.shape === 'rect') ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+    else { ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill(); }
+    ctx.restore();
+  });
+  if (confettiPieces.length > 0) requestAnimationFrame(animateConfetti);
+  else { confettiRunning = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+}
+
+// ==================== FLOATERS ====================
+function initFloaters() {
+  const el = document.getElementById('floaters');
+  const emojis = ['🌱','🌸','⭐','🍃','🌺','🦋','🌈','🍎','🐝','🎈'];
+  for (let i = 0; i < 12; i++) {
+    const d = document.createElement('div');
+    d.className = 'floater';
+    d.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    d.style.left = Math.random() * 100 + '%';
+    d.style.animationDuration = (Math.random() * 10 + 8) + 's';
+    d.style.animationDelay = (Math.random() * 8) + 's';
+    el.appendChild(d);
+  }
+}
+
+function spawnStar(x, y) {
+  const s = document.createElement('div');
+  s.className = 'star-burst';
+  s.textContent = ['⭐','✨','🌟','💫'][Math.floor(Math.random()*4)];
+  s.style.left = (x - 16) + 'px';
+  s.style.top = (y - 16) + 'px';
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 800);
+}
+
+// ==================== RENDER HOME ====================
+function renderHome() {
+  document.getElementById('modules-screen').style.display = '';
+  document.getElementById('lesson-screen').classList.remove('active');
+  document.getElementById('result-screen').classList.remove('active');
+  const grid = document.getElementById('modules-grid');
+  grid.innerHTML = '';
+  MODULES.forEach(mod => {
+    const prog = moduleProgress[mod.id] || { done: [], score: 0 };
+    const total = mod.lessons.length;
+    const done = prog.done.length;
+    const card = document.createElement('div');
+    card.className = 'module-card' + (done === total ? ' done' : '');
+    card.innerHTML = `
+      <div class="module-icon">${mod.icon}</div>
+      <div class="module-name">${mod.title}</div>
+      <div class="module-progress">${done}/${total} done · ${prog.score || 0} pts</div>
+      <div class="module-bar"><div class="module-bar-fill" style="width:${(done/total)*100}%;background:${mod.color}"></div></div>
+    `;
+    card.addEventListener('click', () => { playClick(); startModule(mod); });
+    grid.appendChild(card);
+  });
+}
+
+// ==================== START MODULE ====================
+function startModule(mod) {
+  currentModule = mod;
+  currentLessonIdx = 0;
+  lessonScore = 0;
+  document.getElementById('modules-screen').style.display = 'none';
+  document.getElementById('lesson-screen').classList.add('active');
+  document.getElementById('result-screen').classList.remove('active');
+  document.getElementById('lesson-module-title').textContent = mod.icon + ' ' + mod.title;
+  renderLessonNav();
+  renderLesson();
+}
+
+function goHome() { playClick(); renderHome(); }
+
+// ==================== LESSON NAV ====================
+function renderLessonNav() {
+  const nav = document.getElementById('lesson-nav');
+  nav.innerHTML = '';
+  const prog = moduleProgress[currentModule.id] || { done: [] };
+  currentModule.lessons.forEach((l, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'lesson-dot' +
+      (i === currentLessonIdx ? ' active' : '') +
+      (prog.done.includes(l.id) ? ' done' : '');
+    dot.textContent = i + 1;
+    nav.appendChild(dot);
+  });
+}
+
+// ==================== RENDER LESSON ====================
+function renderLesson() {
+  matchSelectedLeft = null; matchSelectedRight = null;
+  matchDone = {}; labelSelectedChip = null; labelPlacements = {}; sortBuckets = {};
+  const fb = document.getElementById('feedback-bar');
+  fb.className = 'feedback-bar';
+  const nb = document.getElementById('next-btn');
+  nb.className = 'next-btn';
+  renderLessonNav();
+
+  const lesson = currentModule.lessons[currentLessonIdx];
+  const card = document.getElementById('question-card');
+  card.innerHTML = `<div class="q-type-badge">${lesson.badge}</div>
+    <div class="q-prompt">${lesson.prompt}</div>
+    <div id="q-body"></div>`;
+
+  const body = document.getElementById('q-body');
+
+  switch(lesson.type) {
+    case 'label_image': renderLabelImage(lesson, body); break;
+    case 'image_selection': renderMultipleChoice(lesson, body, true); break;
+    case 'multiple_choice': renderMultipleChoice(lesson, body, false); break;
+    case 'riddle': renderMultipleChoice(lesson, body, false); break;
+    case 'true_false': renderTrueFalse(lesson, body); break;
+    case 'fill_blank': renderFillBlank(lesson, body); break;
+    case 'matching': renderMatching(lesson, body); break;
+    case 'sorting': renderSorting(lesson, body); break;
+  }
+}
+
+// ==================== MULTIPLE CHOICE ====================
+function renderMultipleChoice(lesson, body, showEmoji) {
+  const grid = document.createElement('div');
+  grid.className = 'options-grid';
+  lesson.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = showEmoji ? `<span class="option-emoji">${opt.emoji}</span>${opt.text}` : `${opt.emoji ? opt.emoji + ' ' : ''}${opt.text}`;
+    btn.addEventListener('click', (e) => {
+      if (btn.disabled) return;
+      grid.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+      if (opt.correct) {
+        btn.classList.add('correct');
+        showFeedback(true, "Great job! That's correct! 🎉");
+        spawnStar(e.clientX, e.clientY);
+        addScore(10);
+        playCorrect(); launchConfetti(40);
+      } else {
+        btn.classList.add('wrong');
+        grid.querySelectorAll('.option-btn').forEach(b => { if (b !== btn && lesson.options[Array.from(grid.querySelectorAll('.option-btn')).indexOf(b)]?.correct) b.classList.add('reveal'); });
+        showFeedback(false, "Not quite! The correct answer is highlighted in green.");
+        playWrong();
+      }
+      showNext();
+    });
+    grid.appendChild(btn);
+  });
+  body.appendChild(grid);
+}
+
+// ==================== TRUE / FALSE ====================
+function renderTrueFalse(lesson, body) {
+  const grid = document.createElement('div');
+  grid.className = 'tf-grid';
+  ['True','False'].forEach(val => {
+    const btn = document.createElement('button');
+    btn.className = `tf-btn ${val.toLowerCase()}-btn`;
+    btn.innerHTML = val === 'True' ? '✅ True' : '❌ False';
+    btn.addEventListener('click', (e) => {
+      if (btn.disabled) return;
+      grid.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
+      if (val === lesson.correct) {
+        btn.classList.add('correct');
+        showFeedback(true, (lesson.fact || "Correct! Well done! 🎉"));
+        spawnStar(e.clientX, e.clientY);
+        addScore(10); playCorrect(); launchConfetti(40);
+      } else {
+        btn.classList.add('wrong');
+        grid.querySelectorAll('.tf-btn').forEach(b => { if (b.textContent.includes(lesson.correct)) b.classList.add('reveal'); });
+        showFeedback(false, "Oops! The correct answer is " + lesson.correct + ". " + (lesson.fact || ""));
+        playWrong();
+      }
+      showNext();
+    });
+    grid.appendChild(btn);
+  });
+  body.appendChild(grid);
+}
+
+// ==================== FILL IN BLANK ====================
+function renderFillBlank(lesson, body) {
+  const sentenceDiv = document.createElement('div');
+  sentenceDiv.style = 'font-size:1.2rem;font-weight:700;margin-bottom:1rem;padding:1rem;background:#FFF8E1;border-radius:12px;border:2px solid #FFE082;';
+  sentenceDiv.innerHTML = `${lesson.sentence} <span style="display:inline-block;min-width:80px;border-bottom:3px solid #999;text-align:center;" id="blank-display">___</span> .`;
+  body.appendChild(sentenceDiv);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fitb-wrap';
+  lesson.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'fitb-option';
+    btn.textContent = opt;
+    btn.addEventListener('click', (e) => {
+      if (btn.disabled) return;
+      wrap.querySelectorAll('.fitb-option').forEach(b => b.disabled = true);
+      document.getElementById('blank-display').textContent = opt;
+      if (opt === lesson.correct) {
+        btn.classList.add('correct');
+        document.getElementById('blank-display').style.color = '#2E7D32';
+        showFeedback(true, `Yes! "${lesson.correct}" is correct! 🎉`);
+        spawnStar(e.clientX, e.clientY);
+        addScore(10); playCorrect(); launchConfetti(40);
+      } else {
+        btn.classList.add('wrong');
+        wrap.querySelectorAll('.fitb-option').forEach(b => { if (b.textContent === lesson.correct) b.classList.add('reveal'); });
+        showFeedback(false, `The correct word is "${lesson.correct}".`);
+        playWrong();
+      }
+      showNext();
+    });
+    wrap.appendChild(btn);
+  });
+  body.appendChild(wrap);
+}
+
+// ==================== MATCHING ====================
+function renderMatching(lesson, body) {
+  let selectedLeft = null;
+  const matched = {};
+  let correctCount = 0;
+  const total = lesson.pairs.length;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'match-wrap';
+
+  const leftCol = document.createElement('div'); leftCol.className = 'match-col';
+  const arrow = document.createElement('div'); arrow.className = 'match-connector'; arrow.textContent = '↔';
+  const rightCol = document.createElement('div'); rightCol.className = 'match-col';
+
+  leftCol.innerHTML = '<div class="match-col-title">Organ / Helper</div>';
+  rightCol.innerHTML = '<div class="match-col-title">Function / Tool</div>';
+
+  const shuffledRight = [...lesson.pairs].sort(() => Math.random() - 0.5);
+
+  lesson.pairs.forEach((pair, i) => {
+    const lBtn = document.createElement('div');
+    lBtn.className = 'match-item'; lBtn.textContent = pair.item; lBtn.dataset.idx = i;
+    lBtn.addEventListener('click', () => {
+      if (lBtn.classList.contains('matched')) return;
+      leftCol.querySelectorAll('.match-item').forEach(b => b.classList.remove('selected'));
+      lBtn.classList.add('selected');
+      selectedLeft = i;
+      playClick();
+    });
+    leftCol.appendChild(lBtn);
+  });
+
+  shuffledRight.forEach((pair) => {
+    const rBtn = document.createElement('div');
+    rBtn.className = 'match-item'; rBtn.textContent = pair.match; rBtn.dataset.match = pair.match;
+    rBtn.addEventListener('click', (e) => {
+      if (rBtn.classList.contains('matched') || selectedLeft === null) return;
+      const leftPair = lesson.pairs[selectedLeft];
+      if (leftPair.match === pair.match) {
+        rBtn.classList.add('matched');
+        leftCol.querySelector(`[data-idx="${selectedLeft}"]`).classList.remove('selected');
+        leftCol.querySelector(`[data-idx="${selectedLeft}"]`).classList.add('matched');
+        matched[selectedLeft] = true;
+        correctCount++;
+        playCorrect();
+        spawnStar(e.clientX, e.clientY);
+        selectedLeft = null;
+        if (correctCount === total) {
+          showFeedback(true, "Amazing! You matched all pairs correctly! 🎉");
+          addScore(10 * total); launchConfetti(60); showNext();
+        }
+      } else {
+        rBtn.classList.add('wrong-flash');
+        leftCol.querySelector(`[data-idx="${selectedLeft}"]`).classList.remove('selected');
+        selectedLeft = null;
+        playWrong();
+        setTimeout(() => rBtn.classList.remove('wrong-flash'), 600);
+      }
+    });
+    rightCol.appendChild(rBtn);
+  });
+
+  wrap.appendChild(leftCol); wrap.appendChild(arrow); wrap.appendChild(rightCol);
+  body.appendChild(wrap);
+  const hint = document.createElement('div');
+  hint.style = 'font-size:0.85rem;color:var(--muted);margin-top:0.8rem;';
+  hint.textContent = '👆 Tap an item on the left, then tap its match on the right.';
+  body.appendChild(hint);
+}
+
+// ==================== SORTING ====================
+function renderSorting(lesson, body) {
+  lesson.categories.forEach(c => sortBuckets[c] = []);
+  let unsorted = [...lesson.items];
+
+  const trayWrap = document.createElement('div');
+  trayWrap.innerHTML = '<div style="font-size:0.85rem;font-weight:800;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:.05em;">Items to Sort</div>';
+  const tray = document.createElement('div');
+  tray.className = 'sort-items'; tray.id = 'sort-tray';
+
+  unsorted.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'sort-chip'; chip.textContent = item.name;
+    chip.draggable = true; chip.dataset.item = item.name; chip.dataset.cat = item.category;
+    chip.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text', JSON.stringify({ name: item.name, cat: item.category, from: 'tray' }));
+      chip.classList.add('dragging');
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    // click to cycle through buckets on mobile
+    chip.addEventListener('click', () => {
+      const cats = lesson.categories;
+      let placed = false;
+      for (const cat of cats) {
+        if (!sortBuckets[cat].find(i => i.name === item.name)) {
+          sortBuckets[cat].push(item);
+          renderBuckets(lesson, body.querySelector('.sort-categories'), tray, lesson);
+          placed = true; playClick(); break;
+        } else {
+          // remove and try next
+          sortBuckets[cat] = sortBuckets[cat].filter(i => i.name !== item.name);
+          renderBuckets(lesson, body.querySelector('.sort-categories'), tray, lesson);
+          placed = false; break;
+        }
+      }
+    });
+    tray.appendChild(chip);
+  });
+  trayWrap.appendChild(tray);
+  body.appendChild(trayWrap);
+
+  const catsDiv = document.createElement('div');
+  catsDiv.className = 'sort-categories';
+  body.appendChild(catsDiv);
+
+  const catColors = ['#E0F7FA','#F3E5F5','#FFF3E0','#E8F5E9'];
+  lesson.categories.forEach((cat, ci) => {
+    const bucket = document.createElement('div');
+    bucket.className = 'sort-bucket'; bucket.dataset.cat = cat;
+    bucket.style.borderColor = ['#26C6DA','#AB47BC','#FFA726','#66BB6A'][ci % 4];
+    const title = document.createElement('div');
+    title.className = 'sort-bucket-title';
+    title.style.color = ['#00838F','#6A1B9A','#E65100','#2E7D32'][ci % 4];
+    title.textContent = cat;
+    const items = document.createElement('div');
+    items.className = 'sort-bucket-items'; items.dataset.cat = cat;
+    bucket.appendChild(title); bucket.appendChild(items);
+    bucket.addEventListener('dragover', (e) => { e.preventDefault(); bucket.classList.add('drag-over'); });
+    bucket.addEventListener('dragleave', () => bucket.classList.remove('drag-over'));
+    bucket.addEventListener('drop', (e) => {
+      e.preventDefault(); bucket.classList.remove('drag-over');
+      const data = JSON.parse(e.dataTransfer.getData('text'));
+      // remove from wherever it was
+      lesson.categories.forEach(c => sortBuckets[c] = sortBuckets[c].filter(i => i.name !== data.name));
+      sortBuckets[cat].push(lesson.items.find(i => i.name === data.name));
+      renderBuckets(lesson, catsDiv, tray, lesson);
+      playClick();
+    });
+    catsDiv.appendChild(bucket);
+  });
+
+  renderBuckets(lesson, catsDiv, tray, lesson);
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'sort-check-btn'; checkBtn.textContent = '✅ Check Answers!';
+  checkBtn.addEventListener('click', () => {
+    let allCorrect = true;
+    let allPlaced = true;
+    const totalItems = lesson.items.length;
+    let placedCount = 0;
+    lesson.categories.forEach(cat => {
+      sortBuckets[cat].forEach(item => {
+        placedCount++;
+        if (item.category !== cat) allCorrect = false;
+      });
+    });
+    if (placedCount < totalItems) { allPlaced = false; }
+    if (!allPlaced) {
+      showFeedback(false, "Please sort all items before checking!"); return;
+    }
+    if (allCorrect) {
+      showFeedback(true, "Perfect sorting! You're a superstar! 🌟");
+      addScore(10 * totalItems); playCorrect(); launchConfetti(70); showNext();
+    } else {
+      showFeedback(false, "Some items are in the wrong group. Try again!");
+      playWrong();
+    }
+  });
+  body.appendChild(checkBtn);
+}
+
+function renderBuckets(lesson, catsDiv, tray, lessonRef) {
+  const allInBuckets = [];
+  lesson.categories.forEach(cat => allInBuckets.push(...sortBuckets[cat].map(i => i.name)));
+
+  // Rebuild tray
+  tray.innerHTML = '';
+  lesson.items.forEach(item => {
+    if (allInBuckets.includes(item.name)) return;
+    const chip = document.createElement('div');
+    chip.className = 'sort-chip'; chip.textContent = item.name;
+    chip.draggable = true;
+    chip.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text', JSON.stringify({ name: item.name, cat: item.category, from: 'tray' }));
+      chip.classList.add('dragging');
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('click', () => {
+      const cats = lesson.categories;
+      if (sortBuckets[cats[0]]) {
+        sortBuckets[cats[0]].push(item);
+        renderBuckets(lesson, catsDiv, tray, lessonRef);
+        playClick();
+      }
+    });
+    tray.appendChild(chip);
+  });
+
+  // Rebuild buckets
+  catsDiv.querySelectorAll('.sort-bucket').forEach(bucket => {
+    const cat = bucket.dataset.cat;
+    const itemsDiv = bucket.querySelector('.sort-bucket-items');
+    itemsDiv.innerHTML = '';
+    (sortBuckets[cat] || []).forEach(item => {
+      const chip = document.createElement('div');
+      chip.className = 'sort-chip'; chip.textContent = item.name;
+      chip.draggable = true;
+      chip.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text', JSON.stringify({ name: item.name, cat: item.category, from: cat }));
+        chip.classList.add('dragging');
+      });
+      chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+      chip.addEventListener('click', () => {
+        sortBuckets[cat] = sortBuckets[cat].filter(i => i.name !== item.name);
+        renderBuckets(lesson, catsDiv, tray, lessonRef);
+        playClick();
+      });
+      itemsDiv.appendChild(chip);
+    });
+  });
+}
+
+// ==================== LABEL IMAGE ====================
+function renderLabelImage(lesson, body) {
+  const wrap = document.createElement('div');
+  wrap.style = 'position:relative;display:inline-block;max-width:100%;width:100%;';
+
+  // Simple SVG plant
+  wrap.innerHTML = `
+    <svg viewBox="0 0 220 320" class="plant-svg" style="max-width:260px;display:block;margin:0 auto;">
+      <!-- Pot -->
+      <rect x="80" y="270" width="60" height="40" rx="4" fill="#A0522D"/>
+      <rect x="75" y="265" width="70" height="12" rx="4" fill="#8B4513"/>
+      <!-- Roots -->
+      <line x1="110" y1="270" x2="90" y2="310" stroke="#8B6914" stroke-width="3"/>
+      <line x1="110" y1="270" x2="130" y2="310" stroke="#8B6914" stroke-width="3"/>
+      <line x1="110" y1="270" x2="110" y2="315" stroke="#8B6914" stroke-width="3"/>
+      <!-- Stem -->
+      <rect x="106" y="160" width="8" height="110" rx="4" fill="#4CAF50"/>
+      <!-- Branch left -->
+      <line x1="110" y1="210" x2="70" y2="170" stroke="#4CAF50" stroke-width="5"/>
+      <!-- Branch right -->
+      <line x1="110" y1="190" x2="155" y2="155" stroke="#4CAF50" stroke-width="5"/>
+      <!-- Leaf left -->
+      <ellipse cx="55" cy="158" rx="22" ry="13" fill="#66BB6A" transform="rotate(-30 55 158)"/>
+      <!-- Leaf right -->
+      <ellipse cx="168" cy="143" rx="22" ry="13" fill="#66BB6A" transform="rotate(20 168 143)"/>
+      <!-- Flower -->
+      <circle cx="90" cy="110" r="10" fill="#FFD600"/>
+      <circle cx="90" cy="97" r="7" fill="#FF7043"/>
+      <circle cx="78" cy="110" r="7" fill="#FF7043"/>
+      <circle cx="102" cy="110" r="7" fill="#FF7043"/>
+      <circle cx="90" cy="123" r="7" fill="#FF7043"/>
+      <!-- Fruit (tomato) -->
+      <circle cx="150" cy="100" r="18" fill="#F44336"/>
+      <circle cx="150" cy="87" r="4" fill="#4CAF50"/>
+      <line x1="150" y1="83" x2="150" y2="77" stroke="#4CAF50" stroke-width="2"/>
+      <!-- Labels as clickable zones -->
+      <rect id="zone-Roots" x="130" y="285" width="55" height="22" rx="8" fill="white" fill-opacity="0.85" stroke="#999" stroke-dasharray="4,2" stroke-width="1.5" style="cursor:pointer"/>
+      <text x="157" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#555" pointer-events="none" id="ztext-Roots">Roots?</text>
+      <rect id="zone-Stem" x="125" y="200" width="55" height="22" rx="8" fill="white" fill-opacity="0.85" stroke="#999" stroke-dasharray="4,2" stroke-width="1.5" style="cursor:pointer"/>
+      <text x="152" y="215" text-anchor="middle" font-size="11" font-weight="bold" fill="#555" pointer-events="none" id="ztext-Stem">Stem?</text>
+      <rect id="zone-Leaf" x="160" y="160" width="48" height="22" rx="8" fill="white" fill-opacity="0.85" stroke="#999" stroke-dasharray="4,2" stroke-width="1.5" style="cursor:pointer"/>
+      <text x="184" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="#555" pointer-events="none" id="ztext-Leaf">Leaf?</text>
+      <rect id="zone-Flower" x="22" y="90" width="55" height="22" rx="8" fill="white" fill-opacity="0.85" stroke="#999" stroke-dasharray="4,2" stroke-width="1.5" style="cursor:pointer"/>
+      <text x="49" y="105" text-anchor="middle" font-size="11" font-weight="bold" fill="#555" pointer-events="none" id="ztext-Flower">Flower?</text>
+      <rect id="zone-Fruit" x="150" y="65" width="48" height="22" rx="8" fill="white" fill-opacity="0.85" stroke="#999" stroke-dasharray="4,2" stroke-width="1.5" style="cursor:pointer"/>
+      <text x="174" y="80" text-anchor="middle" font-size="11" font-weight="bold" fill="#555" pointer-events="none" id="ztext-Fruit">Fruit?</text>
+    </svg>
+  `;
+
+  body.appendChild(wrap);
+
+  const hint2 = document.createElement('div');
+  hint2.style = 'font-size:0.85rem;color:var(--muted);margin:.5rem 0;';
+  hint2.textContent = '👇 Tap a label below, then tap the matching zone on the plant!';
+  body.appendChild(hint2);
+
+  const tray = document.createElement('div');
+  tray.className = 'label-options-tray';
+
+  const parts = lesson.parts.map(p => p.name);
+  const placed = {};
+  let selectedLabel = null;
+
+  parts.forEach(name => {
+    const chip = document.createElement('div');
+    chip.className = 'label-chip'; chip.textContent = name; chip.dataset.label = name;
+    chip.addEventListener('click', () => {
+      if (placed[name]) return;
+      tray.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedLabel = name;
+      playClick();
+    });
+    tray.appendChild(chip);
+  });
+  body.appendChild(tray);
+
+  // Attach zone click
+  parts.forEach(name => {
+    const zone = wrap.querySelector('#zone-' + name);
+    const ztext = wrap.querySelector('#ztext-' + name);
+    if (!zone) return;
+    zone.addEventListener('click', (e) => {
+      if (placed[name]) return;
+      if (!selectedLabel) { return; }
+      if (selectedLabel === name) {
+        placed[name] = true;
+        zone.setAttribute('stroke', '#66BB6A'); zone.setAttribute('stroke-dasharray', '0');
+        zone.setAttribute('fill', '#E8F5E9');
+        ztext.setAttribute('fill', '#2E7D32'); ztext.textContent = name;
+        tray.querySelector(`[data-label="${name}"]`).classList.add('used');
+        tray.querySelector(`[data-label="${name}"]`).classList.remove('selected');
+        selectedLabel = null;
+        spawnStar(e.clientX, e.clientY); playCorrect();
+        if (Object.keys(placed).length === parts.length) {
+          showFeedback(true, "Brilliant! You labelled the whole plant! 🌿🎉");
+          addScore(10 * parts.length); launchConfetti(70); showNext();
+        }
+      } else {
+        zone.setAttribute('fill', '#FFEBEE'); zone.setAttribute('stroke', '#EF5350');
+        playWrong();
+        setTimeout(() => { zone.setAttribute('fill', 'white'); zone.setAttribute('stroke', '#999'); }, 600);
+      }
+    });
+  });
+}
+
+// ==================== FEEDBACK & SCORE ====================
+function showFeedback(correct, msg) {
+  const fb = document.getElementById('feedback-bar');
+  const fi = document.getElementById('feedback-icon');
+  const ft = document.getElementById('feedback-text');
+  fb.className = 'feedback-bar show ' + (correct ? 'correct-fb' : 'wrong-fb');
+  fi.textContent = correct ? '🎉' : '😅';
+  ft.textContent = msg;
+}
+
+function addScore(pts) {
+  lessonScore += pts;
+  totalScore += pts;
+  document.getElementById('total-score').textContent = totalScore;
+}
+
+function showNext() {
+  document.getElementById('next-btn').classList.add('show');
+  document.getElementById('next-btn').textContent =
+    currentLessonIdx < currentModule.lessons.length - 1 ? 'Next Question ➜' : 'See Results! 🏆';
+}
+
+function nextLesson() {
+  playClick();
+  const prog = moduleProgress[currentModule.id] || { done: [], score: 0 };
+  const lesson = currentModule.lessons[currentLessonIdx];
+  if (!prog.done.includes(lesson.id)) prog.done.push(lesson.id);
+  prog.score = (prog.score || 0) + lessonScore;
+  lessonScore = 0;
+  moduleProgress[currentModule.id] = prog;
+
+  currentLessonIdx++;
+  if (currentLessonIdx >= currentModule.lessons.length) {
+    showResult();
+  } else {
+    renderLesson();
+  }
+}
+
+// ==================== RESULT ====================
+function showResult() {
+  playFanfare(); launchConfetti(120);
+  document.getElementById('lesson-screen').classList.remove('active');
+  document.getElementById('result-screen').classList.add('active');
+  const prog = moduleProgress[currentModule.id] || { done: [], score: 0 };
+  const score = prog.score;
+  const maxScore = currentModule.lessons.reduce((a, l) => {
+    if (l.type === 'label_image') return a + l.parts.length * 10;
+    if (l.type === 'matching') return a + l.pairs.length * 10;
+    if (l.type === 'sorting') return a + l.items.length * 10;
+    return a + 10;
+  }, 0);
+  const pct = score / maxScore;
+  const stars = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+  const msgs = pct >= 0.8
+    ? ["You're a superstar! 🌟", "Outstanding work!", "You nailed it! 🎉"]
+    : pct >= 0.5
+    ? ["Good effort! Keep going!", "You're getting there! 💪"]
+    : ["Keep practising, you'll get it! 🌱"];
+  document.getElementById('result-stars').textContent = stars;
+  document.getElementById('result-score-display').textContent = score + ' pts';
+  document.getElementById('result-msg').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+function retryModule() {
+  playClick();
+  moduleProgress[currentModule.id] = { done: [], score: 0 };
+  startModule(currentModule);
+}
+
+// ==================== INIT ====================
+initFloaters();
+renderHome();
+// Unlock audio on first interaction
+document.addEventListener('click', () => { if (AC.state === 'suspended') AC.resume(); }, { once: true });
+</script>
+</body>
+</html>
