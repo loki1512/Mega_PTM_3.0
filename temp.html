@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Who's Up? 🎉</title>
 <style>
   * { box-sizing: border-box; }
@@ -13,7 +14,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 12px;
   }
   .card {
     background: #fffdf7;
@@ -40,9 +41,11 @@
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
   }
   input[type="text"] {
     flex: 1;
+    min-width: 140px;
     padding: 10px 14px;
     border-radius: 12px;
     border: 2px solid #ffc2d1;
@@ -58,14 +61,20 @@
     border-radius: 12px;
     font-weight: bold;
     font-family: inherit;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   #addBtn {
     background: #ffd166;
     color: #6b4400;
     padding: 10px 16px;
     font-size: 15px;
+    white-space: nowrap;
   }
   #addBtn:hover { background: #ffc23f; }
+  #addBtn:active {
+    transform: scale(0.95);
+  }
   ul#list {
     list-style: none;
     padding: 0;
@@ -84,6 +93,7 @@
     font-size: 15px;
     border: 1px solid #ffe0a3;
     transition: transform 0.2s;
+    word-break: break-word;
   }
   ul#list li.picked {
     background: #d3f9d8;
@@ -95,6 +105,11 @@
     color: #d6336c;
     font-size: 16px;
     padding: 2px 8px;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .removeBtn:active {
+    transform: scale(0.9);
   }
   .count {
     text-align: center;
@@ -131,6 +146,8 @@
     align-items: center;
     justify-content: center;
     color: #2b8a3e;
+    word-break: break-word;
+    padding: 0 8px;
   }
   #result.spinning {
     color: #d6336c;
@@ -156,6 +173,194 @@
     color: #d6336c;
     font-size: 13px;
     margin-top: 8px;
+    word-break: break-word;
+  }
+
+  /* Tablet Styles (641px - 1024px) */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    body {
+      padding: 16px;
+    }
+    .card {
+      padding: 28px;
+    }
+    h1 {
+      font-size: 32px;
+    }
+    #result {
+      font-size: 36px;
+    }
+  }
+
+  /* Mobile Styles (max-width 640px) */
+  @media (max-width: 640px) {
+    body {
+      padding: 8px;
+    }
+    .card {
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 100%;
+    }
+    h1 {
+      font-size: 24px;
+      margin: 0 0 8px;
+    }
+    .sub {
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+    .input-row {
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      min-width: 100px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+    #addBtn {
+      padding: 8px 14px;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    ul#list {
+      max-height: 200px;
+      margin-bottom: 12px;
+    }
+    ul#list li {
+      padding: 6px 10px;
+      font-size: 13px;
+      margin-bottom: 5px;
+      border-radius: 8px;
+    }
+    .removeBtn {
+      font-size: 14px;
+      padding: 2px 6px;
+      margin-left: 6px;
+    }
+    .count {
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    #pickBtn {
+      font-size: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      box-shadow: 0 4px 0 #d6336c;
+    }
+    #pickBtn:active {
+      box-shadow: 0 1px 0 #d6336c;
+    }
+    #result {
+      font-size: 26px;
+      min-height: 50px;
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+    .hint {
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  }
+
+  /* Small Mobile Styles (max-width 480px) */
+  @media (max-width: 480px) {
+    body {
+      padding: 4px;
+    }
+    .card {
+      padding: 16px;
+      border-radius: 14px;
+      border-width: 3px;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+    .sub {
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .input-row {
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    input[type="text"] {
+      min-width: 80px;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    #addBtn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    ul#list {
+      max-height: 180px;
+      margin-bottom: 10px;
+    }
+    ul#list li {
+      padding: 5px 8px;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .removeBtn {
+      font-size: 13px;
+      padding: 1px 5px;
+      margin-left: 4px;
+    }
+    .count {
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+    #pickBtn {
+      font-size: 16px;
+      padding: 12px;
+      box-shadow: 0 3px 0 #d6336c;
+    }
+    #result {
+      font-size: 22px;
+      min-height: 45px;
+      margin-top: 12px;
+    }
+    .hint {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .confetti {
+      font-size: 18px;
+    }
+  }
+
+  /* Landscape Orientation */
+  @media (max-width: 840px) and (orientation: landscape) {
+    body {
+      padding: 8px;
+      min-height: auto;
+    }
+    .card {
+      padding: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+    .sub {
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+    ul#list {
+      max-height: 150px;
+    }
+    #result {
+      font-size: 20px;
+      min-height: 40px;
+      margin-top: 10px;
+    }
   }
 </style>
 </head>
